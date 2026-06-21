@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ubuntu SSH internal-sftp Subsystem Explained - ssh</title>
+    <meta name="description" content="This article explains the internal-sftp subsystem within the Ubuntu Linux SSH server configuration. You will learn what this subsystem is, how it differs from the traditional external SFTP server, why it is preferred for securing user environments, and h">
+    <link rel="canonical" href="https://salivity.github.io/ssh/article/ubuntu-ssh-internal-sftp-subsystem-explained">
+    <link rel="icon" href="/ssh/favicon.ico">
+    <link rel="stylesheet" href="/ssh/css/style.css">
+    <script src="/ssh/js/fuse.min.js"></script>
+    <script src="/ssh/js/script.js" defer></script>
+    <script id="MathJax-script" src="/ssh/js/mathjax.min.js" async></script>
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="Ubuntu SSH internal-sftp Subsystem Explained - ssh" />
+    <meta property="og:url" content="https://salivity.github.io/ssh/article/ubuntu-ssh-internal-sftp-subsystem-explained" />
+    <meta property="og:image:url" content="https://salivity.github.io/ssh/images/open-graph/default.webp" />
+    <meta property="og:image:secure_url" content="https://salivity.github.io/ssh/images/open-graph/default.webp" />
+    <meta property="og:image:width" content="1120" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:description" content="This article explains the internal-sftp subsystem within the Ubuntu Linux SSH server configuration. You will learn what this subsystem is, how it differs from the traditional external SFTP server, why it is preferred for securing user environments, and h" />
+    <link rel="manifest" href="/ssh/pwa/manifest.json" />
+</head>
+<body>
+    <header>
+        <a href="/ssh/" aria-label="Go To Home Page" title="Go To Home Page" id="logo">
+            <span>salivity.github.io/</span><span>ssh</span>
+        </a>
+        <nav>
+            <ul class="header-links">
+                <li><a href="https://github.com/salivity" title="Github" aria-label="Go To Github Profile Page"><svg class="svg-icon" focusable="false" aria-hidden="true" viewBox="0 0 24 24"><path d="M12 1.27a11 11 0 00-3.48 21.46c.55.09.73-.28.73-.55v-1.84c-3.03.64-3.67-1.46-3.67-1.46-.55-1.29-1.28-1.65-1.28-1.65-.92-.65.1-.65.1-.65 1.1 0 1.73 1.1 1.73 1.1.92 1.65 2.57 1.2 3.21.92a2 2 0 01.64-1.47c-2.47-.27-5.04-1.19-5.04-5.5 0-1.1.46-2.1 1.2-2.84a3.76 3.76 0 010-2.93s.91-.28 3.11 1.1c1.8-.49 3.7-.49 5.5 0 2.1-1.38 3.02-1.1 3.02-1.1a3.76 3.76 0 010 2.93c.83.74 1.2 1.74 1.2 2.94 0 4.21-2.57 5.13-5.04 5.4.45.37.82.92.82 2.02v3.03c0 .27.1.64.73.55A11 11 0 0012 1.27"></path></svg></a></li>
+                <li><a href="/ssh/search" title="Search" aria-label="Go To Search Page"><svg class="svg-icon" aria-hidden="true" focusable="false" viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14"></path></svg></a></li>
+                <li><a id="theme-toggle" title="Theme" href="javascript:void(0);" aria-label="Toggle Website Theme"></a></li>
+            </ul>
+        </nav>
+    </header>
+    <main>
+        <article><h1 id="ubuntu-ssh-internal-sftp-subsystem-explained">Ubuntu SSH
+internal-sftp Subsystem Explained</h1>
+<p>This article explains the <code>internal-sftp</code> subsystem within
+the Ubuntu Linux SSH server configuration. You will learn what this
+subsystem is, how it differs from the traditional external SFTP server,
+why it is preferred for securing user environments, and how to configure
+it on your Ubuntu system to restrict users to their home
+directories.</p>
+<h2 id="what-is-the-internal-sftp-subsystem">What is the internal-sftp
+Subsystem?</h2>
+<p>In the OpenSSH server (<code>sshd</code>) on Ubuntu, the SFTP (Secure
+File Transfer Protocol) service is defined as a subsystem. Historically,
+SSH handled SFTP connections by launching an external binary, typically
+located at <code>/usr/lib/openssh/sftp-server</code>.</p>
+<p>The <code>internal-sftp</code> subsystem is an alternative
+implementation. Instead of launching an external program, it runs the
+SFTP service directly inside the already-running <code>sshd</code>
+process. This in-process execution provides significant security and
+administrative advantages.</p>
+<h2 id="key-advantages-of-internal-sftp">Key Advantages of
+internal-sftp</h2>
+<h3 id="simplified-chroot-jails">1. Simplified Chroot Jails</h3>
+<p>When you restrict a user to a specific directory (known as a “chroot
+jail” using the <code>ChrootDirectory</code> directive), the SSH server
+isolates them from the rest of the filesystem. * If you use the external
+<code>sftp-server</code> binary, you must copy that binary, its
+dependent system libraries, and <code>/dev</code> nodes into the chroot
+directory so it can run. * If you use <code>internal-sftp</code>, no
+external files are required. Because the code runs inside the main
+<code>sshd</code> process, it already has the necessary resources
+loaded, allowing you to easily chroot users into completely empty
+directories.</p>
+<h3 id="enhanced-security">2. Enhanced Security</h3>
+<p>Using <code>internal-sftp</code> allows system administrators to
+completely disable shell access (like bash or sh) for file-transfer
+users. By combining it with the <code>ForceCommand internal-sftp</code>
+directive, the user is strictly limited to file transfer operations and
+cannot execute arbitrary terminal commands on the Ubuntu server.</p>
+<h3 id="performance-and-efficiency">3. Performance and Efficiency</h3>
+<p>Because it does not require the operating system to fork a new
+process and execute an external binary for every SFTP session,
+<code>internal-sftp</code> uses fewer system resources and initiates
+connections slightly faster.</p>
+<h2 id="how-to-configure-internal-sftp-on-ubuntu">How to Configure
+internal-sftp on Ubuntu</h2>
+<p>To configure the internal SFTP subsystem, you must edit the SSH
+daemon configuration file. Follow these steps to set up a secure,
+chrooted SFTP environment:</p>
+<ol type="1">
+<li><p>Open the SSH configuration file with root privileges:</p>
+<div class="sourceCode" id="cb1"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> nano /etc/ssh/sshd_config</span></code></pre></div></li>
+<li><p>Locate the line defining the SFTP subsystem. By default, it often
+looks like this:</p>
+<pre class="text"><code>Subsystem sftp /usr/lib/openssh/sftp-server</code></pre></li>
+<li><p>Change it to use the internal subsystem:</p>
+<pre class="text"><code>Subsystem sftp internal-sftp</code></pre></li>
+<li><p>To restrict a specific group of users (for example, a group named
+<code>sftp-only</code>) so they can only use SFTP and are locked to
+their home directories, add the following block to the end of the
+file:</p>
+<pre class="text"><code>Match Group sftp-only
+    ChrootDirectory %h
+    ForceCommand internal-sftp
+    AllowTcpForwarding no
+    X11Forwarding no</code></pre>
+<p><em>(Note: <code>%h</code> represents the user’s home directory.
+Ensure the home directory is owned by <code>root</code> and not writable
+by any other user, which is a strict requirement for SSH chroot
+environments).</em></p></li>
+<li><p>Save the file and restart the SSH service to apply the
+changes:</p>
+<div class="sourceCode" id="cb5"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> systemctl restart ssh</span></code></pre></div></li>
+</ol></article>
+        <div id=comments-container></div>
+
+        <script>
+            const utterancesScript = document.createElement('script');
+            
+            utterancesScript.setAttribute('src', 'https://utteranc.es/client.js');
+            utterancesScript.setAttribute('repo', 'salivity/ssh'); 
+            utterancesScript.setAttribute('issue-term', 'pathname'); 
+            utterancesScript.setAttribute('theme', localStorage.getItem('theme') === 'light' ? 'github-light' : 'github-dark'); 
+            utterancesScript.setAttribute('crossorigin', 'anonymous');
+            utterancesScript.async = true;
+
+            document.getElementById('comments-container').appendChild(utterancesScript);
+        </script>
+    
+    </main>
+    <footer>
+        <nav>
+            <ul class="footer-links">
+                <li><a href="/ssh/privacy-policy">Privacy Policy</a></li>
+                <li><a href="/ssh/terms-and-conditions">Terms and Conditions</a></li>
+            </ul>
+        </nav>
+        <div class="copyright">
+            Copyright &copy; <span id="current-year"></span>
+        </div>
+    </footer>
+</body>
+</html>

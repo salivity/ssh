@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>What is StrictHostKeyChecking in Ubuntu SSH - ssh</title>
+    <meta name="description" content="This article explains the purpose and functionality of the StrictHostKeyChecking option in the Ubuntu Linux SSH client configuration. You will learn how this security feature prevents man-in-the-middle attacks, how its different settings (ask, yes, accep">
+    <link rel="canonical" href="https://salivity.github.io/ssh/article/what-is-stricthostkeychecking-in-ubuntu-ssh">
+    <link rel="icon" href="/ssh/favicon.ico">
+    <link rel="stylesheet" href="/ssh/css/style.css">
+    <script src="/ssh/js/fuse.min.js"></script>
+    <script src="/ssh/js/script.js" defer></script>
+    <script id="MathJax-script" src="/ssh/js/mathjax.min.js" async></script>
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="What is StrictHostKeyChecking in Ubuntu SSH - ssh" />
+    <meta property="og:url" content="https://salivity.github.io/ssh/article/what-is-stricthostkeychecking-in-ubuntu-ssh" />
+    <meta property="og:image:url" content="https://salivity.github.io/ssh/images/open-graph/default.webp" />
+    <meta property="og:image:secure_url" content="https://salivity.github.io/ssh/images/open-graph/default.webp" />
+    <meta property="og:image:width" content="1120" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:description" content="This article explains the purpose and functionality of the StrictHostKeyChecking option in the Ubuntu Linux SSH client configuration. You will learn how this security feature prevents man-in-the-middle attacks, how its different settings (ask, yes, accep" />
+    <link rel="manifest" href="/ssh/pwa/manifest.json" />
+</head>
+<body>
+    <header>
+        <a href="/ssh/" aria-label="Go To Home Page" title="Go To Home Page" id="logo">
+            <span>salivity.github.io/</span><span>ssh</span>
+        </a>
+        <nav>
+            <ul class="header-links">
+                <li><a href="https://github.com/salivity" title="Github" aria-label="Go To Github Profile Page"><svg class="svg-icon" focusable="false" aria-hidden="true" viewBox="0 0 24 24"><path d="M12 1.27a11 11 0 00-3.48 21.46c.55.09.73-.28.73-.55v-1.84c-3.03.64-3.67-1.46-3.67-1.46-.55-1.29-1.28-1.65-1.28-1.65-.92-.65.1-.65.1-.65 1.1 0 1.73 1.1 1.73 1.1.92 1.65 2.57 1.2 3.21.92a2 2 0 01.64-1.47c-2.47-.27-5.04-1.19-5.04-5.5 0-1.1.46-2.1 1.2-2.84a3.76 3.76 0 010-2.93s.91-.28 3.11 1.1c1.8-.49 3.7-.49 5.5 0 2.1-1.38 3.02-1.1 3.02-1.1a3.76 3.76 0 010 2.93c.83.74 1.2 1.74 1.2 2.94 0 4.21-2.57 5.13-5.04 5.4.45.37.82.92.82 2.02v3.03c0 .27.1.64.73.55A11 11 0 0012 1.27"></path></svg></a></li>
+                <li><a href="/ssh/search" title="Search" aria-label="Go To Search Page"><svg class="svg-icon" aria-hidden="true" focusable="false" viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14"></path></svg></a></li>
+                <li><a id="theme-toggle" title="Theme" href="javascript:void(0);" aria-label="Toggle Website Theme"></a></li>
+            </ul>
+        </nav>
+    </header>
+    <main>
+        <article><h1 id="what-is-stricthostkeychecking-in-ubuntu-ssh">What is
+StrictHostKeyChecking in Ubuntu SSH</h1>
+<p>This article explains the purpose and functionality of the
+<code>StrictHostKeyChecking</code> option in the Ubuntu Linux SSH client
+configuration. You will learn how this security feature prevents
+man-in-the-middle attacks, how its different settings (<code>ask</code>,
+<code>yes</code>, <code>accept-new</code>, and <code>no</code>) behave,
+and how to safely configure it for your environment.</p>
+<h2 id="what-is-stricthostkeychecking">What is
+StrictHostKeyChecking?</h2>
+<p>When you connect to a remote server via SSH for the first time, the
+server sends its unique public key (host key) to your Ubuntu client. The
+<code>StrictHostKeyChecking</code> option determines how your SSH client
+responds to this key, specifically whether it will automatically trust
+the key, prompt you for verification, or reject the connection if the
+key is unrecognized or has changed.</p>
+<p>This setting is a crucial defense against Man-in-the-Middle (MITM)
+attacks, where an attacker intercepts your connection and impersonates
+the destination server.</p>
+<h2 id="configuration-file-locations">Configuration File Locations</h2>
+<p>In Ubuntu, this option can be configured globally or for individual
+users:</p>
+<ul>
+<li><strong>Global configuration:</strong>
+<code>/etc/ssh/ssh_config</code></li>
+<li><strong>User-specific configuration:</strong>
+<code>~/.ssh/config</code></li>
+</ul>
+<p>You can also override this setting on a per-command basis using the
+<code>-o</code> flag:</p>
+<div class="sourceCode" id="cb1"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">ssh</span> <span class="at">-o</span> StrictHostKeyChecking=yes user@server_ip</span></code></pre></div>
+<h2 id="the-four-configuration-options">The Four Configuration
+Options</h2>
+<p>The <code>StrictHostKeyChecking</code> parameter accepts one of four
+values, each offering a different balance of security and
+convenience:</p>
+<h3 id="ask-default">1. ask (Default)</h3>
+<p>This is the default behavior of the OpenSSH client. * <strong>New
+Host:</strong> The client prompts you with a message asking if you want
+to trust the new key. If you type “yes”, the key is saved to your
+<code>~/.ssh/known_hosts</code> file, and you are connected. *
+<strong>Changed Key:</strong> If the server’s key has changed since your
+last connection, the client will refuse the connection and show a
+warning, as this could indicate an ongoing attack.</p>
+<h3 id="yes">2. yes</h3>
+<p>This is the most secure setting. * <strong>New Host:</strong> The
+client will refuse to connect and will not prompt you to add the key.
+You must manually add the remote host’s key to your
+<code>~/.ssh/known_hosts</code> file before you can connect. *
+<strong>Changed Key:</strong> The connection is immediately aborted if
+the key does not match the saved key.</p>
+<h3 id="accept-new">3. accept-new</h3>
+<p>This option is ideal for automation and scripting where you want
+convenience for new servers but security for existing ones. *
+<strong>New Host:</strong> The client automatically trusts the new key
+and adds it to the <code>known_hosts</code> file without asking for user
+confirmation. * <strong>Changed Key:</strong> The client strictly
+refuses the connection if the key for an existing host has changed.</p>
+<h3 id="no">4. no</h3>
+<p>This is the least secure setting and is generally not recommended for
+production environments. * <strong>New Host:</strong> The client
+automatically adds the host key to <code>known_hosts</code> and
+connects. * <strong>Changed Key:</strong> The client allows you to
+connect even if the host key has changed, though it will print a warning
+message to the terminal. This leaves the connection highly vulnerable to
+MITM attacks.</p></article>
+        <div id=comments-container></div>
+
+        <script>
+            const utterancesScript = document.createElement('script');
+            
+            utterancesScript.setAttribute('src', 'https://utteranc.es/client.js');
+            utterancesScript.setAttribute('repo', 'salivity/ssh'); 
+            utterancesScript.setAttribute('issue-term', 'pathname'); 
+            utterancesScript.setAttribute('theme', localStorage.getItem('theme') === 'light' ? 'github-light' : 'github-dark'); 
+            utterancesScript.setAttribute('crossorigin', 'anonymous');
+            utterancesScript.async = true;
+
+            document.getElementById('comments-container').appendChild(utterancesScript);
+        </script>
+    
+    </main>
+    <footer>
+        <nav>
+            <ul class="footer-links">
+                <li><a href="/ssh/privacy-policy">Privacy Policy</a></li>
+                <li><a href="/ssh/terms-and-conditions">Terms and Conditions</a></li>
+            </ul>
+        </nav>
+        <div class="copyright">
+            Copyright &copy; <span id="current-year"></span>
+        </div>
+    </footer>
+</body>
+</html>

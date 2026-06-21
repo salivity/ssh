@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SSH Escape Characters on Ubuntu Linux Explained - ssh</title>
+    <meta name="description" content="This article explains the purpose and utility of SSH escape characters on an Ubuntu Linux client. Readers will learn how these special keystrokes allow users to interact directly with their local SSH client to manage frozen connections, configure port fo">
+    <link rel="canonical" href="https://salivity.github.io/ssh/article/ssh-escape-characters-on-ubuntu-linux-explained">
+    <link rel="icon" href="/ssh/favicon.ico">
+    <link rel="stylesheet" href="/ssh/css/style.css">
+    <script src="/ssh/js/fuse.min.js"></script>
+    <script src="/ssh/js/script.js" defer></script>
+    <script id="MathJax-script" src="/ssh/js/mathjax.min.js" async></script>
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="SSH Escape Characters on Ubuntu Linux Explained - ssh" />
+    <meta property="og:url" content="https://salivity.github.io/ssh/article/ssh-escape-characters-on-ubuntu-linux-explained" />
+    <meta property="og:image:url" content="https://salivity.github.io/ssh/images/open-graph/default.webp" />
+    <meta property="og:image:secure_url" content="https://salivity.github.io/ssh/images/open-graph/default.webp" />
+    <meta property="og:image:width" content="1120" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:description" content="This article explains the purpose and utility of SSH escape characters on an Ubuntu Linux client. Readers will learn how these special keystrokes allow users to interact directly with their local SSH client to manage frozen connections, configure port fo" />
+    <link rel="manifest" href="/ssh/pwa/manifest.json" />
+</head>
+<body>
+    <header>
+        <a href="/ssh/" aria-label="Go To Home Page" title="Go To Home Page" id="logo">
+            <span>salivity.github.io/</span><span>ssh</span>
+        </a>
+        <nav>
+            <ul class="header-links">
+                <li><a href="https://github.com/salivity" title="Github" aria-label="Go To Github Profile Page"><svg class="svg-icon" focusable="false" aria-hidden="true" viewBox="0 0 24 24"><path d="M12 1.27a11 11 0 00-3.48 21.46c.55.09.73-.28.73-.55v-1.84c-3.03.64-3.67-1.46-3.67-1.46-.55-1.29-1.28-1.65-1.28-1.65-.92-.65.1-.65.1-.65 1.1 0 1.73 1.1 1.73 1.1.92 1.65 2.57 1.2 3.21.92a2 2 0 01.64-1.47c-2.47-.27-5.04-1.19-5.04-5.5 0-1.1.46-2.1 1.2-2.84a3.76 3.76 0 010-2.93s.91-.28 3.11 1.1c1.8-.49 3.7-.49 5.5 0 2.1-1.38 3.02-1.1 3.02-1.1a3.76 3.76 0 010 2.93c.83.74 1.2 1.74 1.2 2.94 0 4.21-2.57 5.13-5.04 5.4.45.37.82.92.82 2.02v3.03c0 .27.1.64.73.55A11 11 0 0012 1.27"></path></svg></a></li>
+                <li><a href="/ssh/search" title="Search" aria-label="Go To Search Page"><svg class="svg-icon" aria-hidden="true" focusable="false" viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14"></path></svg></a></li>
+                <li><a id="theme-toggle" title="Theme" href="javascript:void(0);" aria-label="Toggle Website Theme"></a></li>
+            </ul>
+        </nav>
+    </header>
+    <main>
+        <article><h1 id="ssh-escape-characters-on-ubuntu-linux-explained">SSH Escape
+Characters on Ubuntu Linux Explained</h1>
+<p>This article explains the purpose and utility of SSH escape
+characters on an Ubuntu Linux client. Readers will learn how these
+special keystrokes allow users to interact directly with their local SSH
+client to manage frozen connections, configure port forwarding on the
+fly, and pause sessions without disconnecting.</p>
+<h2 id="what-is-the-ssh-escape-character">What is the SSH Escape
+Character?</h2>
+<p>On an Ubuntu Linux client, the SSH escape character is a special
+keyboard trigger—by default, the tilde key (<code>~</code>)—that tells
+the local SSH client to intercept the subsequent keystroke instead of
+sending it to the remote server.</p>
+<p>Normally, every key you type during an SSH session is transmitted
+directly to the remote machine. However, when the escape character is
+invoked properly, the local SSH client pauses transmission to the remote
+host and executes a local command instead.</p>
+<h2 id="how-to-use-the-escape-character">How to Use the Escape
+Character</h2>
+<p>To trigger an escape command, the escape character must be typed
+immediately after a newline. The SSH client will not recognize the
+escape sequence if it is typed in the middle of a line of text.</p>
+<p>The standard sequence to initiate an escape command is: 1. Press
+<strong>Enter</strong> (to start a new line). 2. Press the
+<strong><code>~</code></strong> (tilde) key. 3. Press the specific
+command key (e.g., <code>.</code>, <code>^Z</code>, or
+<code>C</code>).</p>
+<h2 id="essential-ssh-escape-commands">Essential SSH Escape
+Commands</h2>
+<p>Once the escape character sequence is initiated, several commands can
+be executed. Below are the most common and useful escape commands
+available on Ubuntu:</p>
+<h3 id="terminate-a-frozen-session-.">1. Terminate a Frozen Session
+(<code>~.</code>)</h3>
+<p>If a remote server crashes, drops its network connection, or runs a
+process that hangs the terminal, the session can become completely
+unresponsive. Pressing <code>Enter</code>, then <code>~</code>, then
+<code>.</code> (period) will immediately terminate the connection and
+return you to your local Ubuntu command prompt.</p>
+<h3 id="suspend-the-ssh-session-z">2. Suspend the SSH Session
+(<code>~^Z</code>)</h3>
+<p>If you need to run a quick command on your local Ubuntu machine
+without closing your remote session, press <code>Enter</code>, then
+<code>~</code>, followed by <strong>Ctrl + Z</strong>. This suspends the
+SSH client and puts it in the background. To resume the session, type
+<code>fg</code> in your local terminal and press
+<strong>Enter</strong>.</p>
+<h3 id="open-the-ssh-command-line-c">3. Open the SSH Command Line
+(<code>~C</code>)</h3>
+<p>Pressing <code>Enter</code>, then <code>~</code>, then <strong>Shift
++ C</strong> opens an interactive SSH command line
+(<code>ssh&gt;</code>). This command line allows you to modify the
+current connection dynamically. The most common use case is adding port
+forwards on the fly without restarting the connection, using syntax
+like:</p>
+<div class="sourceCode" id="cb1"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">ssh</span><span class="op">&gt;</span> -L 8080:localhost:80</span></code></pre></div>
+<h3 id="list-all-available-options">4. List All Available Options
+(<code>~?</code>)</h3>
+<p>If you forget the available escape commands, pressing
+<code>Enter</code>, then <code>~</code>, then <code>?</code> will print
+a help menu directly in your terminal listing all supported escape
+sequences.</p>
+<h2 id="customizing-or-disabling-the-escape-character">Customizing or
+Disabling the Escape Character</h2>
+<p>If you frequently type tildes at the start of lines or use
+applications that conflict with the default escape character, you can
+change or disable it.</p>
+<p>To disable the escape character for a single session, use the
+<code>-e</code> flag with <code>none</code>:</p>
+<div class="sourceCode" id="cb2"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="fu">ssh</span> <span class="at">-e</span> none user@remote_host</span></code></pre></div>
+<p>To permanently change the escape character (for example, to a
+Ctrl-character or a different symbol), add the <code>EscapeChar</code>
+directive to your local SSH configuration file
+(<code>~/.ssh/config</code>):</p>
+<pre class="text"><code>Host *
+    EscapeChar ~</code></pre>
+<p>Replacing <code>~</code> with your preferred character or
+<code>none</code> will apply the configuration to all future SSH
+connections.</p></article>
+        <div id=comments-container></div>
+
+        <script>
+            const utterancesScript = document.createElement('script');
+            
+            utterancesScript.setAttribute('src', 'https://utteranc.es/client.js');
+            utterancesScript.setAttribute('repo', 'salivity/ssh'); 
+            utterancesScript.setAttribute('issue-term', 'pathname'); 
+            utterancesScript.setAttribute('theme', localStorage.getItem('theme') === 'light' ? 'github-light' : 'github-dark'); 
+            utterancesScript.setAttribute('crossorigin', 'anonymous');
+            utterancesScript.async = true;
+
+            document.getElementById('comments-container').appendChild(utterancesScript);
+        </script>
+    
+    </main>
+    <footer>
+        <nav>
+            <ul class="footer-links">
+                <li><a href="/ssh/privacy-policy">Privacy Policy</a></li>
+                <li><a href="/ssh/terms-and-conditions">Terms and Conditions</a></li>
+            </ul>
+        </nav>
+        <div class="copyright">
+            Copyright &copy; <span id="current-year"></span>
+        </div>
+    </footer>
+</body>
+</html>

@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ubuntu SSH authorized_keys file permissions - ssh</title>
+    <meta name="description" content="Setting the correct file permissions on your authorizedkeys file in Ubuntu is critical for securing your SSH connections and ensuring key-based authentication works. This guide details the exact permission settings required for both the .ssh directory an">
+    <link rel="canonical" href="https://salivity.github.io/ssh/article/ubuntu-ssh-authorized-keys-file-permissions">
+    <link rel="icon" href="/ssh/favicon.ico">
+    <link rel="stylesheet" href="/ssh/css/style.css">
+    <script src="/ssh/js/fuse.min.js"></script>
+    <script src="/ssh/js/script.js" defer></script>
+    <script id="MathJax-script" src="/ssh/js/mathjax.min.js" async></script>
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="Ubuntu SSH authorized_keys file permissions - ssh" />
+    <meta property="og:url" content="https://salivity.github.io/ssh/article/ubuntu-ssh-authorized-keys-file-permissions" />
+    <meta property="og:image:url" content="https://salivity.github.io/ssh/images/open-graph/default.webp" />
+    <meta property="og:image:secure_url" content="https://salivity.github.io/ssh/images/open-graph/default.webp" />
+    <meta property="og:image:width" content="1120" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:description" content="Setting the correct file permissions on your authorizedkeys file in Ubuntu is critical for securing your SSH connections and ensuring key-based authentication works. This guide details the exact permission settings required for both the .ssh directory an" />
+    <link rel="manifest" href="/ssh/pwa/manifest.json" />
+</head>
+<body>
+    <header>
+        <a href="/ssh/" aria-label="Go To Home Page" title="Go To Home Page" id="logo">
+            <span>salivity.github.io/</span><span>ssh</span>
+        </a>
+        <nav>
+            <ul class="header-links">
+                <li><a href="https://github.com/salivity" title="Github" aria-label="Go To Github Profile Page"><svg class="svg-icon" focusable="false" aria-hidden="true" viewBox="0 0 24 24"><path d="M12 1.27a11 11 0 00-3.48 21.46c.55.09.73-.28.73-.55v-1.84c-3.03.64-3.67-1.46-3.67-1.46-.55-1.29-1.28-1.65-1.28-1.65-.92-.65.1-.65.1-.65 1.1 0 1.73 1.1 1.73 1.1.92 1.65 2.57 1.2 3.21.92a2 2 0 01.64-1.47c-2.47-.27-5.04-1.19-5.04-5.5 0-1.1.46-2.1 1.2-2.84a3.76 3.76 0 010-2.93s.91-.28 3.11 1.1c1.8-.49 3.7-.49 5.5 0 2.1-1.38 3.02-1.1 3.02-1.1a3.76 3.76 0 010 2.93c.83.74 1.2 1.74 1.2 2.94 0 4.21-2.57 5.13-5.04 5.4.45.37.82.92.82 2.02v3.03c0 .27.1.64.73.55A11 11 0 0012 1.27"></path></svg></a></li>
+                <li><a href="/ssh/search" title="Search" aria-label="Go To Search Page"><svg class="svg-icon" aria-hidden="true" focusable="false" viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14"></path></svg></a></li>
+                <li><a id="theme-toggle" title="Theme" href="javascript:void(0);" aria-label="Toggle Website Theme"></a></li>
+            </ul>
+        </nav>
+    </header>
+    <main>
+        <article><h1 id="ubuntu-ssh-authorized_keys-file-permissions">Ubuntu SSH
+authorized_keys file permissions</h1>
+<p>Setting the correct file permissions on your
+<code>authorized_keys</code> file in Ubuntu is critical for securing
+your SSH connections and ensuring key-based authentication works. This
+guide details the exact permission settings required for both the
+<code>.ssh</code> directory and the <code>authorized_keys</code> file,
+explains why SSH enforces these rules, and provides the commands to
+apply them.</p>
+<h2 id="required-permissions-and-ownership">Required Permissions and
+Ownership</h2>
+<p>For SSH key-based authentication to function securely on Ubuntu, the
+SSH daemon (<code>sshd</code>) enforces strict permission requirements.
+If the permissions are too permissive (i.e., other users can read or
+write to them), SSH will reject the key and fall back to password
+authentication.</p>
+<p>The precise permissions required are:</p>
+<ul>
+<li><strong>The User’s Home Directory (<code>~</code>):</strong> Must
+not be writable by group or others. Recommended permission:
+<code>750</code> or <code>755</code>.</li>
+<li><strong>The <code>.ssh</code> Directory
+(<code>~/.ssh</code>):</strong> Must be owned by the user, with read,
+write, and execute permissions restricted only to the owner. Required
+permission: <code>700</code> (<code>drwx------</code>).</li>
+<li><strong>The <code>authorized_keys</code> File
+(<code>~/.ssh/authorized_keys</code>):</strong> Must be owned by the
+user, with read and write permissions restricted only to the owner.
+Required permission: <code>600</code> (<code>-rw-------</code>).</li>
+</ul>
+<h2 id="commands-to-set-correct-permissions">Commands to Set Correct
+Permissions</h2>
+<p>If you are experiencing connection issues or setting up SSH for the
+first time, run the following commands in the terminal to apply the
+correct permissions:</p>
+<ol type="1">
+<li><p>Set the correct ownership for the <code>.ssh</code> directory and
+its contents:</p>
+<div class="sourceCode" id="cb1"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">chown</span> <span class="at">-R</span> <span class="va">$USER</span>:<span class="va">$USER</span> ~/.ssh</span></code></pre></div></li>
+<li><p>Set the permissions for the <code>.ssh</code> directory to
+<code>700</code> (Owner-only access):</p>
+<div class="sourceCode" id="cb2"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="fu">chmod</span> 700 ~/.ssh</span></code></pre></div></li>
+<li><p>Set the permissions for the <code>authorized_keys</code> file to
+<code>600</code> (Owner-only read/write):</p>
+<div class="sourceCode" id="cb3"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="fu">chmod</span> 600 ~/.ssh/authorized_keys</span></code></pre></div></li>
+</ol>
+<h2 id="why-ssh-enforces-these-permissions">Why SSH Enforces These
+Permissions</h2>
+<p>These strict permissions are enforced by a configuration directive in
+the SSH daemon configuration file (<code>/etc/ssh/sshd_config</code>)
+called <code>StrictModes</code>, which is enabled (<code>yes</code>) by
+default.</p>
+<p>If <code>StrictModes</code> is active, the SSH server will refuse to
+use public keys stored in any <code>authorized_keys</code> file that can
+be modified or read by other users on the system. This prevents
+unauthorized local users from adding their own public keys to your
+profile or tampering with your configuration.</p></article>
+        <div id=comments-container></div>
+
+        <script>
+            const utterancesScript = document.createElement('script');
+            
+            utterancesScript.setAttribute('src', 'https://utteranc.es/client.js');
+            utterancesScript.setAttribute('repo', 'salivity/ssh'); 
+            utterancesScript.setAttribute('issue-term', 'pathname'); 
+            utterancesScript.setAttribute('theme', localStorage.getItem('theme') === 'light' ? 'github-light' : 'github-dark'); 
+            utterancesScript.setAttribute('crossorigin', 'anonymous');
+            utterancesScript.async = true;
+
+            document.getElementById('comments-container').appendChild(utterancesScript);
+        </script>
+    
+    </main>
+    <footer>
+        <nav>
+            <ul class="footer-links">
+                <li><a href="/ssh/privacy-policy">Privacy Policy</a></li>
+                <li><a href="/ssh/terms-and-conditions">Terms and Conditions</a></li>
+            </ul>
+        </nav>
+        <div class="copyright">
+            Copyright &copy; <span id="current-year"></span>
+        </div>
+    </footer>
+</body>
+</html>

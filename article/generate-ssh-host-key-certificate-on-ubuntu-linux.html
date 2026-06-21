@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Generate SSH Host Key Certificate on Ubuntu Linux - ssh</title>
+    <meta name="description" content="Securing SSH connections with host key certificates eliminates "unknown host" warnings and protects users from man-in-the-middle attacks. This guide provides a straightforward, step-by-step walkthrough on how to set up an SSH Certificate Authority (CA),">
+    <link rel="canonical" href="https://salivity.github.io/ssh/article/generate-ssh-host-key-certificate-on-ubuntu-linux">
+    <link rel="icon" href="/ssh/favicon.ico">
+    <link rel="stylesheet" href="/ssh/css/style.css">
+    <script src="/ssh/js/fuse.min.js"></script>
+    <script src="/ssh/js/script.js" defer></script>
+    <script id="MathJax-script" src="/ssh/js/mathjax.min.js" async></script>
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="Generate SSH Host Key Certificate on Ubuntu Linux - ssh" />
+    <meta property="og:url" content="https://salivity.github.io/ssh/article/generate-ssh-host-key-certificate-on-ubuntu-linux" />
+    <meta property="og:image:url" content="https://salivity.github.io/ssh/images/open-graph/default.webp" />
+    <meta property="og:image:secure_url" content="https://salivity.github.io/ssh/images/open-graph/default.webp" />
+    <meta property="og:image:width" content="1120" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:description" content="Securing SSH connections with host key certificates eliminates "unknown host" warnings and protects users from man-in-the-middle attacks. This guide provides a straightforward, step-by-step walkthrough on how to set up an SSH Certificate Authority (CA)," />
+    <link rel="manifest" href="/ssh/pwa/manifest.json" />
+</head>
+<body>
+    <header>
+        <a href="/ssh/" aria-label="Go To Home Page" title="Go To Home Page" id="logo">
+            <span>salivity.github.io/</span><span>ssh</span>
+        </a>
+        <nav>
+            <ul class="header-links">
+                <li><a href="https://github.com/salivity" title="Github" aria-label="Go To Github Profile Page"><svg class="svg-icon" focusable="false" aria-hidden="true" viewBox="0 0 24 24"><path d="M12 1.27a11 11 0 00-3.48 21.46c.55.09.73-.28.73-.55v-1.84c-3.03.64-3.67-1.46-3.67-1.46-.55-1.29-1.28-1.65-1.28-1.65-.92-.65.1-.65.1-.65 1.1 0 1.73 1.1 1.73 1.1.92 1.65 2.57 1.2 3.21.92a2 2 0 01.64-1.47c-2.47-.27-5.04-1.19-5.04-5.5 0-1.1.46-2.1 1.2-2.84a3.76 3.76 0 010-2.93s.91-.28 3.11 1.1c1.8-.49 3.7-.49 5.5 0 2.1-1.38 3.02-1.1 3.02-1.1a3.76 3.76 0 010 2.93c.83.74 1.2 1.74 1.2 2.94 0 4.21-2.57 5.13-5.04 5.4.45.37.82.92.82 2.02v3.03c0 .27.1.64.73.55A11 11 0 0012 1.27"></path></svg></a></li>
+                <li><a href="/ssh/search" title="Search" aria-label="Go To Search Page"><svg class="svg-icon" aria-hidden="true" focusable="false" viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14"></path></svg></a></li>
+                <li><a id="theme-toggle" title="Theme" href="javascript:void(0);" aria-label="Toggle Website Theme"></a></li>
+            </ul>
+        </nav>
+    </header>
+    <main>
+        <article><h1 id="generate-ssh-host-key-certificate-on-ubuntu-linux">Generate SSH
+Host Key Certificate on Ubuntu Linux</h1>
+<p>Securing SSH connections with host key certificates eliminates
+“unknown host” warnings and protects users from man-in-the-middle
+attacks. This guide provides a straightforward, step-by-step walkthrough
+on how to set up an SSH Certificate Authority (CA), sign an Ubuntu Linux
+server’s host key, and configure the SSH daemon to present the resulting
+host key certificate to connecting clients.</p>
+<h3 id="step-1-create-the-ssh-certificate-authority-ca-key-pair">Step 1:
+Create the SSH Certificate Authority (CA) Key Pair</h3>
+<p>The SSH CA should be created and stored on a highly secure, isolated
+administrator machine, not on the public Ubuntu SSH server itself.</p>
+<p>Run the following command on your secure machine to generate the CA
+key pair:</p>
+<div class="sourceCode" id="cb1"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">ssh-keygen</span> <span class="at">-t</span> ed25519 <span class="at">-f</span> ssh_ca_key <span class="at">-C</span> <span class="st">&quot;My Company SSH CA&quot;</span></span></code></pre></div>
+<p>This generates two files: * <code>ssh_ca_key</code> (the private key,
+which must be kept secret) * <code>ssh_ca_key.pub</code> (the public
+key, which will be distributed to clients)</p>
+<h3 id="step-2-retrieve-the-servers-public-host-key">Step 2: Retrieve
+the Server’s Public Host Key</h3>
+<p>You need to sign the Ubuntu server’s default host key. By default,
+these keys are located in <code>/etc/ssh/</code> on your Ubuntu
+server.</p>
+<p>Copy the server’s public ED25519 host key to your local CA
+machine:</p>
+<div class="sourceCode" id="cb2"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="fu">scp</span> user@your-ubuntu-server:/etc/ssh/ssh_host_ed25519_key.pub ./ssh_host_ed25519_key.pub</span></code></pre></div>
+<h3 id="step-3-sign-the-host-key-with-the-ca">Step 3: Sign the Host Key
+with the CA</h3>
+<p>On your CA machine, sign the server’s public host key using your CA
+private key. Customize the domains and IP addresses in the principals
+list (<code>-n</code>) to match your server:</p>
+<div class="sourceCode" id="cb3"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="fu">ssh-keygen</span> <span class="at">-s</span> ssh_ca_key <span class="at">-I</span> <span class="st">&quot;ubuntu-server-01&quot;</span> <span class="at">-h</span> <span class="at">-n</span> <span class="st">&quot;example.com,192.168.1.50&quot;</span> <span class="at">-V</span> +52w ssh_host_ed25519_key.pub</span></code></pre></div>
+<p>Understanding the flags: * <code>-s ssh_ca_key</code>: Specifies the
+CA private key to sign with. * <code>-I "ubuntu-server-01"</code>: A key
+identifier for logging purposes. * <code>-h</code>: Specifies that this
+is a host certificate, not a user certificate. *
+<code>-n "example.com,192.168.1.50"</code>: A comma-separated list of
+valid hostnames or IP addresses for the server. * <code>-V +52w</code>:
+Sets the certificate validity period (e.g., 52 weeks).</p>
+<p>This command generates a signed certificate file named
+<code>ssh_host_ed25519_key-cert.pub</code>.</p>
+<h3 id="step-4-copy-the-certificate-to-the-ubuntu-server">Step 4: Copy
+the Certificate to the Ubuntu Server</h3>
+<p>Upload the generated certificate file back to the
+<code>/etc/ssh/</code> directory on your Ubuntu server:</p>
+<div class="sourceCode" id="cb4"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="fu">scp</span> ssh_host_ed25519_key-cert.pub user@your-ubuntu-server:/tmp/</span></code></pre></div>
+<p>On the Ubuntu server, move the certificate to the correct directory
+and set the appropriate file permissions:</p>
+<div class="sourceCode" id="cb5"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> mv /tmp/ssh_host_ed25519_key-cert.pub /etc/ssh/</span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> chmod 644 /etc/ssh/ssh_host_ed25519_key-cert.pub</span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> chown root:root /etc/ssh/ssh_host_ed25519_key-cert.pub</span></code></pre></div>
+<h3 id="step-5-configure-the-ubuntu-ssh-daemon">Step 5: Configure the
+Ubuntu SSH Daemon</h3>
+<p>To force the SSH server to present the certificate to connecting
+clients, you must update the SSH configuration file.</p>
+<p>Open <code>/etc/ssh/sshd_config</code> in a text editor:</p>
+<div class="sourceCode" id="cb6"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> nano /etc/ssh/sshd_config</span></code></pre></div>
+<p>Add the following line to the file:</p>
+<pre class="text"><code>HostCertificate /etc/ssh/ssh_host_ed25519_key-cert.pub</code></pre>
+<p>Save and close the file, then test the configuration for errors:</p>
+<div class="sourceCode" id="cb8"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> sshd <span class="at">-t</span></span></code></pre></div>
+<p>If no errors are returned, restart the SSH service to apply the
+changes:</p>
+<div class="sourceCode" id="cb9"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> systemctl restart ssh</span></code></pre></div>
+<h3 id="step-6-configure-ssh-clients-to-trust-the-ca">Step 6: Configure
+SSH Clients to Trust the CA</h3>
+<p>For clients to connect without receiving host key warnings, they must
+trust your SSH CA.</p>
+<p>Add the CA public key to the client’s <code>~/.ssh/known_hosts</code>
+file. Open the file and append a line in the following format (replace
+the content with your actual <code>ssh_ca_key.pub</code> string):</p>
+<pre class="text"><code>@cert-authority *.example.com ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAA... My Company SSH CA</code></pre>
+<p>Replace <code>*.example.com</code> with the domain wildcard or
+specific IP addresses matching your server infrastructure. The client
+will now automatically trust any server presenting a valid host
+certificate signed by your CA.</p></article>
+        <div id=comments-container></div>
+
+        <script>
+            const utterancesScript = document.createElement('script');
+            
+            utterancesScript.setAttribute('src', 'https://utteranc.es/client.js');
+            utterancesScript.setAttribute('repo', 'salivity/ssh'); 
+            utterancesScript.setAttribute('issue-term', 'pathname'); 
+            utterancesScript.setAttribute('theme', localStorage.getItem('theme') === 'light' ? 'github-light' : 'github-dark'); 
+            utterancesScript.setAttribute('crossorigin', 'anonymous');
+            utterancesScript.async = true;
+
+            document.getElementById('comments-container').appendChild(utterancesScript);
+        </script>
+    
+    </main>
+    <footer>
+        <nav>
+            <ul class="footer-links">
+                <li><a href="/ssh/privacy-policy">Privacy Policy</a></li>
+                <li><a href="/ssh/terms-and-conditions">Terms and Conditions</a></li>
+            </ul>
+        </nav>
+        <div class="copyright">
+            Copyright &copy; <span id="current-year"></span>
+        </div>
+    </footer>
+</body>
+</html>

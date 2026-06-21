@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Restrict SSH Access to Specific Users on Ubuntu - ssh</title>
+    <meta name="description" content="Securing an Ubuntu Linux server requires limiting remote access to only authorized personnel. This article provides a quick, step-by-step guide on how to restrict SSH access to specific users or groups by modifying the SSH daemon configuration file. By i">
+    <link rel="canonical" href="https://salivity.github.io/ssh/article/restrict-ssh-access-to-specific-users-on-ubuntu">
+    <link rel="icon" href="/ssh/favicon.ico">
+    <link rel="stylesheet" href="/ssh/css/style.css">
+    <script src="/ssh/js/fuse.min.js"></script>
+    <script src="/ssh/js/script.js" defer></script>
+    <script id="MathJax-script" src="/ssh/js/mathjax.min.js" async></script>
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="Restrict SSH Access to Specific Users on Ubuntu - ssh" />
+    <meta property="og:url" content="https://salivity.github.io/ssh/article/restrict-ssh-access-to-specific-users-on-ubuntu" />
+    <meta property="og:image:url" content="https://salivity.github.io/ssh/images/open-graph/default.webp" />
+    <meta property="og:image:secure_url" content="https://salivity.github.io/ssh/images/open-graph/default.webp" />
+    <meta property="og:image:width" content="1120" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:description" content="Securing an Ubuntu Linux server requires limiting remote access to only authorized personnel. This article provides a quick, step-by-step guide on how to restrict SSH access to specific users or groups by modifying the SSH daemon configuration file. By i" />
+    <link rel="manifest" href="/ssh/pwa/manifest.json" />
+</head>
+<body>
+    <header>
+        <a href="/ssh/" aria-label="Go To Home Page" title="Go To Home Page" id="logo">
+            <span>salivity.github.io/</span><span>ssh</span>
+        </a>
+        <nav>
+            <ul class="header-links">
+                <li><a href="https://github.com/salivity" title="Github" aria-label="Go To Github Profile Page"><svg class="svg-icon" focusable="false" aria-hidden="true" viewBox="0 0 24 24"><path d="M12 1.27a11 11 0 00-3.48 21.46c.55.09.73-.28.73-.55v-1.84c-3.03.64-3.67-1.46-3.67-1.46-.55-1.29-1.28-1.65-1.28-1.65-.92-.65.1-.65.1-.65 1.1 0 1.73 1.1 1.73 1.1.92 1.65 2.57 1.2 3.21.92a2 2 0 01.64-1.47c-2.47-.27-5.04-1.19-5.04-5.5 0-1.1.46-2.1 1.2-2.84a3.76 3.76 0 010-2.93s.91-.28 3.11 1.1c1.8-.49 3.7-.49 5.5 0 2.1-1.38 3.02-1.1 3.02-1.1a3.76 3.76 0 010 2.93c.83.74 1.2 1.74 1.2 2.94 0 4.21-2.57 5.13-5.04 5.4.45.37.82.92.82 2.02v3.03c0 .27.1.64.73.55A11 11 0 0012 1.27"></path></svg></a></li>
+                <li><a href="/ssh/search" title="Search" aria-label="Go To Search Page"><svg class="svg-icon" aria-hidden="true" focusable="false" viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14"></path></svg></a></li>
+                <li><a id="theme-toggle" title="Theme" href="javascript:void(0);" aria-label="Toggle Website Theme"></a></li>
+            </ul>
+        </nav>
+    </header>
+    <main>
+        <article><h1 id="restrict-ssh-access-to-specific-users-on-ubuntu">Restrict SSH
+Access to Specific Users on Ubuntu</h1>
+<p>Securing an Ubuntu Linux server requires limiting remote access to
+only authorized personnel. This article provides a quick, step-by-step
+guide on how to restrict SSH access to specific users or groups by
+modifying the SSH daemon configuration file. By implementing these
+changes, you will significantly enhance your server’s security posture
+and prevent unauthorized login attempts.</p>
+<h2 id="step-1-open-the-ssh-configuration-file">Step 1: Open the SSH
+Configuration File</h2>
+<p>To begin, edit the SSH daemon configuration file using a text editor
+with administrative privileges. Run the following command in your
+terminal:</p>
+<div class="sourceCode" id="cb1"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> nano /etc/ssh/sshd_config</span></code></pre></div>
+<h2 id="step-2-define-allowed-users-or-groups">Step 2: Define Allowed
+Users or Groups</h2>
+<p>Scroll to the bottom of the file and add the rules to restrict
+access. You can restrict access using either individual usernames or
+system groups.</p>
+<h3 id="option-a-restrict-by-username">Option A: Restrict by
+Username</h3>
+<p>To allow only specific users to log in, add the
+<code>AllowUsers</code> directive followed by the usernames separated by
+spaces.</p>
+<pre class="text"><code>AllowUsers alice bob charlie</code></pre>
+<p><em>Note: Any user not explicitly listed here will be denied SSH
+access, even if they have a valid account on the server.</em></p>
+<h3 id="option-b-restrict-by-user-group">Option B: Restrict by User
+Group</h3>
+<p>If you manage multiple users, it is often easier to restrict access
+by a user group. Add the <code>AllowGroups</code> directive followed by
+the group name:</p>
+<pre class="text"><code>AllowGroups sshusers</code></pre>
+<p><em>(To use this option, ensure you have created the group using
+<code>sudo addgroup sshusers</code> and added your users to it using
+<code>sudo usermod -aG sshusers username</code>).</em></p>
+<h2 id="step-3-save-and-exit">Step 3: Save and Exit</h2>
+<p>If you are using <code>nano</code>, save your changes by pressing
+<code>Ctrl + O</code>, hit <code>Enter</code> to confirm, and then press
+<code>Ctrl + X</code> to exit the editor.</p>
+<h2 id="step-4-test-the-configuration">Step 4: Test the
+Configuration</h2>
+<p>Before applying the changes, test the SSH configuration file for
+syntax errors to prevent accidentally locking yourself out of the
+server:</p>
+<div class="sourceCode" id="cb4"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> sshd <span class="at">-t</span></span></code></pre></div>
+<p>If this command returns no output, your configuration is correct.</p>
+<h2 id="step-5-restart-the-ssh-service">Step 5: Restart the SSH
+Service</h2>
+<p>To apply the restrictions, restart the SSH daemon with the following
+command:</p>
+<div class="sourceCode" id="cb5"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> systemctl restart ssh</span></code></pre></div>
+<p><em>Important: Do not close your current terminal session. Open a new
+terminal window and attempt to log in to ensure your configuration works
+as expected.</em></p></article>
+        <div id=comments-container></div>
+
+        <script>
+            const utterancesScript = document.createElement('script');
+            
+            utterancesScript.setAttribute('src', 'https://utteranc.es/client.js');
+            utterancesScript.setAttribute('repo', 'salivity/ssh'); 
+            utterancesScript.setAttribute('issue-term', 'pathname'); 
+            utterancesScript.setAttribute('theme', localStorage.getItem('theme') === 'light' ? 'github-light' : 'github-dark'); 
+            utterancesScript.setAttribute('crossorigin', 'anonymous');
+            utterancesScript.async = true;
+
+            document.getElementById('comments-container').appendChild(utterancesScript);
+        </script>
+    
+    </main>
+    <footer>
+        <nav>
+            <ul class="footer-links">
+                <li><a href="/ssh/privacy-policy">Privacy Policy</a></li>
+                <li><a href="/ssh/terms-and-conditions">Terms and Conditions</a></li>
+            </ul>
+        </nav>
+        <div class="copyright">
+            Copyright &copy; <span id="current-year"></span>
+        </div>
+    </footer>
+</body>
+</html>

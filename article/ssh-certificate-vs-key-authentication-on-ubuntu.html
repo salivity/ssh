@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SSH Certificate vs Key Authentication on Ubuntu - ssh</title>
+    <meta name="description" content="This article explains the differences between SSH certificate-based authentication and standard SSH public key authentication on Ubuntu Linux. It covers how each method works, compares their security and scalability, and details why certificate-based aut">
+    <link rel="canonical" href="https://salivity.github.io/ssh/article/ssh-certificate-vs-key-authentication-on-ubuntu">
+    <link rel="icon" href="/ssh/favicon.ico">
+    <link rel="stylesheet" href="/ssh/css/style.css">
+    <script src="/ssh/js/fuse.min.js"></script>
+    <script src="/ssh/js/script.js" defer></script>
+    <script id="MathJax-script" src="/ssh/js/mathjax.min.js" async></script>
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="SSH Certificate vs Key Authentication on Ubuntu - ssh" />
+    <meta property="og:url" content="https://salivity.github.io/ssh/article/ssh-certificate-vs-key-authentication-on-ubuntu" />
+    <meta property="og:image:url" content="https://salivity.github.io/ssh/images/open-graph/default.webp" />
+    <meta property="og:image:secure_url" content="https://salivity.github.io/ssh/images/open-graph/default.webp" />
+    <meta property="og:image:width" content="1120" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:description" content="This article explains the differences between SSH certificate-based authentication and standard SSH public key authentication on Ubuntu Linux. It covers how each method works, compares their security and scalability, and details why certificate-based aut" />
+    <link rel="manifest" href="/ssh/pwa/manifest.json" />
+</head>
+<body>
+    <header>
+        <a href="/ssh/" aria-label="Go To Home Page" title="Go To Home Page" id="logo">
+            <span>salivity.github.io/</span><span>ssh</span>
+        </a>
+        <nav>
+            <ul class="header-links">
+                <li><a href="https://github.com/salivity" title="Github" aria-label="Go To Github Profile Page"><svg class="svg-icon" focusable="false" aria-hidden="true" viewBox="0 0 24 24"><path d="M12 1.27a11 11 0 00-3.48 21.46c.55.09.73-.28.73-.55v-1.84c-3.03.64-3.67-1.46-3.67-1.46-.55-1.29-1.28-1.65-1.28-1.65-.92-.65.1-.65.1-.65 1.1 0 1.73 1.1 1.73 1.1.92 1.65 2.57 1.2 3.21.92a2 2 0 01.64-1.47c-2.47-.27-5.04-1.19-5.04-5.5 0-1.1.46-2.1 1.2-2.84a3.76 3.76 0 010-2.93s.91-.28 3.11 1.1c1.8-.49 3.7-.49 5.5 0 2.1-1.38 3.02-1.1 3.02-1.1a3.76 3.76 0 010 2.93c.83.74 1.2 1.74 1.2 2.94 0 4.21-2.57 5.13-5.04 5.4.45.37.82.92.82 2.02v3.03c0 .27.1.64.73.55A11 11 0 0012 1.27"></path></svg></a></li>
+                <li><a href="/ssh/search" title="Search" aria-label="Go To Search Page"><svg class="svg-icon" aria-hidden="true" focusable="false" viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14"></path></svg></a></li>
+                <li><a id="theme-toggle" title="Theme" href="javascript:void(0);" aria-label="Toggle Website Theme"></a></li>
+            </ul>
+        </nav>
+    </header>
+    <main>
+        <article><h1 id="ssh-certificate-vs-key-authentication-on-ubuntu">SSH Certificate
+vs Key Authentication on Ubuntu</h1>
+<p>This article explains the differences between SSH certificate-based
+authentication and standard SSH public key authentication on Ubuntu
+Linux. It covers how each method works, compares their security and
+scalability, and details why certificate-based authentication is the
+preferred choice for managing access in enterprise Ubuntu
+environments.</p>
+<h2 id="understanding-standard-ssh-key-authentication">Understanding
+Standard SSH Key Authentication</h2>
+<p>Standard SSH authentication relies on asymmetric cryptography using a
+public and private key pair.</p>
+<ol type="1">
+<li><strong>How it works:</strong> A user generates a key pair on their
+local machine. They copy the public key to the target Ubuntu server and
+append it to the <code>~/.ssh/authorized_keys</code> file. The private
+key remains securely on the user’s local machine.</li>
+<li><strong>The verification process:</strong> When connecting, the
+server challenges the client to prove they possess the matching private
+key.</li>
+<li><strong>The limitation:</strong> As organizations grow, managing
+standard keys becomes difficult. Every time a user joins, leaves, or
+changes roles, administrators must manually update the
+<code>authorized_keys</code> file on every single server the user needs
+to access. There is also no built-in way to enforce key expiration.</li>
+</ol>
+<h2
+id="understanding-ssh-certificate-based-authentication">Understanding
+SSH Certificate-Based Authentication</h2>
+<p>SSH certificate-based authentication introduces a centralized trust
+model using a Certificate Authority (CA). Instead of servers trusting
+individual user keys, they trust a single, central CA.</p>
+<ol type="1">
+<li><strong>The Certificate Authority (CA):</strong> Administrators
+generate a master SSH key pair to act as the CA. The public portion of
+this CA key is copied to all Ubuntu servers.</li>
+<li><strong>Signing process:</strong> A user generates a standard SSH
+key pair. Instead of copying their public key to the servers, they send
+it to the CA. The CA verifies the user’s identity and signs the public
+key, generating an SSH certificate (a public key packaged with
+metadata).</li>
+<li><strong>The metadata:</strong> This certificate contains
+cryptographic proof of the CA’s signature, the username, and constraints
+such as an expiration time (Time-To-Live) and permitted source IP
+addresses.</li>
+<li><strong>The verification process:</strong> When the user connects to
+an Ubuntu server, they present their certificate. The server verifies
+the CA’s signature on the certificate. If the signature is valid and the
+certificate has not expired, access is granted.</li>
+</ol>
+<h2 id="key-differences">Key Differences</h2>
+<table>
+<colgroup>
+<col style="width: 33%" />
+<col style="width: 33%" />
+<col style="width: 33%" />
+</colgroup>
+<thead>
+<tr>
+<th style="text-align: left;">Feature</th>
+<th style="text-align: left;">Standard SSH Keys</th>
+<th style="text-align: left;">SSH Certificates</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;"><strong>Trust Model</strong></td>
+<td style="text-align: left;">Direct trust (Server trusts individual
+keys)</td>
+<td style="text-align: left;">Centralized trust (Server trusts the
+CA)</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>Server Configuration</strong></td>
+<td style="text-align: left;">Requires updating
+<code>authorized_keys</code> for every user</td>
+<td style="text-align: left;">Configured once with the CA public
+key</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>Expiration</strong></td>
+<td style="text-align: left;">Permanent unless manually deleted</td>
+<td style="text-align: left;">Built-in expiration dates (TTL)</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>Scalability</strong></td>
+<td style="text-align: left;">Poor; difficult to manage across many
+servers</td>
+<td style="text-align: left;">High; seamless addition and removal of
+users</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>Revocation</strong></td>
+<td style="text-align: left;">Manual deletion from target servers</td>
+<td style="text-align: left;">Handled automatically via expiration or
+Key Revocation Lists (KRLs)</td>
+</tr>
+</tbody>
+</table>
+<h2 id="how-ssh-certificates-work-on-ubuntu-linux">How SSH Certificates
+Work on Ubuntu Linux</h2>
+<p>To implement certificate-based authentication on Ubuntu, the OpenSSH
+daemon (<code>sshd</code>) must be configured to trust the CA.</p>
+<h3 id="configure-the-ubuntu-server-to-trust-the-ca">1. Configure the
+Ubuntu Server to Trust the CA</h3>
+<p>The CA’s public key (e.g., <code>ssh-ca.pub</code>) is copied to the
+server, usually to <code>/etc/ssh/ssh-ca.pub</code>.</p>
+<p>To instruct Ubuntu to trust this CA for user logins, the
+<code>/etc/ssh/sshd_config</code> file is updated with the following
+directive:</p>
+<pre class="text"><code>TrustedUserCAKeys /etc/ssh/ssh-ca.pub</code></pre>
+<h3 id="user-authentication-flow">2. User Authentication Flow</h3>
+<p>Once the SSH daemon is restarted
+(<code>sudo systemctl restart ssh</code>), the login workflow
+changes:</p>
+<ul>
+<li><strong>No localized keys:</strong> The
+<code>~/.ssh/authorized_keys</code> file on the target server can remain
+empty.</li>
+<li><strong>Instant provisioning:</strong> If a new developer joins the
+team, the CA signs their key with a 12-hour expiration window. The
+developer can immediately log into any Ubuntu server trusting that CA
+without any server-side configuration changes.</li>
+<li><strong>Automatic revocation:</strong> Once the 12-hour window
+passes, the certificate becomes useless, mitigating the risk of orphaned
+keys.</li>
+</ul></article>
+        <div id=comments-container></div>
+
+        <script>
+            const utterancesScript = document.createElement('script');
+            
+            utterancesScript.setAttribute('src', 'https://utteranc.es/client.js');
+            utterancesScript.setAttribute('repo', 'salivity/ssh'); 
+            utterancesScript.setAttribute('issue-term', 'pathname'); 
+            utterancesScript.setAttribute('theme', localStorage.getItem('theme') === 'light' ? 'github-light' : 'github-dark'); 
+            utterancesScript.setAttribute('crossorigin', 'anonymous');
+            utterancesScript.async = true;
+
+            document.getElementById('comments-container').appendChild(utterancesScript);
+        </script>
+    
+    </main>
+    <footer>
+        <nav>
+            <ul class="footer-links">
+                <li><a href="/ssh/privacy-policy">Privacy Policy</a></li>
+                <li><a href="/ssh/terms-and-conditions">Terms and Conditions</a></li>
+            </ul>
+        </nav>
+        <div class="copyright">
+            Copyright &copy; <span id="current-year"></span>
+        </div>
+    </footer>
+</body>
+</html>

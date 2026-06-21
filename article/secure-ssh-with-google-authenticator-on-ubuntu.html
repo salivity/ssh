@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Secure SSH with Google Authenticator on Ubuntu - ssh</title>
+    <meta name="description" content="This article explains what Google Authenticator is and provides a straightforward, step-by-step guide on how to use it to add multi-factor authentication (MFA) to SSH on Ubuntu Linux. By implementing this setup, you will secure your server against unauth">
+    <link rel="canonical" href="https://salivity.github.io/ssh/article/secure-ssh-with-google-authenticator-on-ubuntu">
+    <link rel="icon" href="/ssh/favicon.ico">
+    <link rel="stylesheet" href="/ssh/css/style.css">
+    <script src="/ssh/js/fuse.min.js"></script>
+    <script src="/ssh/js/script.js" defer></script>
+    <script id="MathJax-script" src="/ssh/js/mathjax.min.js" async></script>
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="Secure SSH with Google Authenticator on Ubuntu - ssh" />
+    <meta property="og:url" content="https://salivity.github.io/ssh/article/secure-ssh-with-google-authenticator-on-ubuntu" />
+    <meta property="og:image:url" content="https://salivity.github.io/ssh/images/open-graph/default.webp" />
+    <meta property="og:image:secure_url" content="https://salivity.github.io/ssh/images/open-graph/default.webp" />
+    <meta property="og:image:width" content="1120" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:description" content="This article explains what Google Authenticator is and provides a straightforward, step-by-step guide on how to use it to add multi-factor authentication (MFA) to SSH on Ubuntu Linux. By implementing this setup, you will secure your server against unauth" />
+    <link rel="manifest" href="/ssh/pwa/manifest.json" />
+</head>
+<body>
+    <header>
+        <a href="/ssh/" aria-label="Go To Home Page" title="Go To Home Page" id="logo">
+            <span>salivity.github.io/</span><span>ssh</span>
+        </a>
+        <nav>
+            <ul class="header-links">
+                <li><a href="https://github.com/salivity" title="Github" aria-label="Go To Github Profile Page"><svg class="svg-icon" focusable="false" aria-hidden="true" viewBox="0 0 24 24"><path d="M12 1.27a11 11 0 00-3.48 21.46c.55.09.73-.28.73-.55v-1.84c-3.03.64-3.67-1.46-3.67-1.46-.55-1.29-1.28-1.65-1.28-1.65-.92-.65.1-.65.1-.65 1.1 0 1.73 1.1 1.73 1.1.92 1.65 2.57 1.2 3.21.92a2 2 0 01.64-1.47c-2.47-.27-5.04-1.19-5.04-5.5 0-1.1.46-2.1 1.2-2.84a3.76 3.76 0 010-2.93s.91-.28 3.11 1.1c1.8-.49 3.7-.49 5.5 0 2.1-1.38 3.02-1.1 3.02-1.1a3.76 3.76 0 010 2.93c.83.74 1.2 1.74 1.2 2.94 0 4.21-2.57 5.13-5.04 5.4.45.37.82.92.82 2.02v3.03c0 .27.1.64.73.55A11 11 0 0012 1.27"></path></svg></a></li>
+                <li><a href="/ssh/search" title="Search" aria-label="Go To Search Page"><svg class="svg-icon" aria-hidden="true" focusable="false" viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14"></path></svg></a></li>
+                <li><a id="theme-toggle" title="Theme" href="javascript:void(0);" aria-label="Toggle Website Theme"></a></li>
+            </ul>
+        </nav>
+    </header>
+    <main>
+        <article><h1 id="secure-ssh-with-google-authenticator-on-ubuntu">Secure SSH with
+Google Authenticator on Ubuntu</h1>
+<p>This article explains what Google Authenticator is and provides a
+straightforward, step-by-step guide on how to use it to add multi-factor
+authentication (MFA) to SSH on Ubuntu Linux. By implementing this setup,
+you will secure your server against unauthorized access by requiring
+both an SSH key or password and a time-sensitive verification code from
+your mobile device.</p>
+<h2 id="what-is-google-authenticator">What is Google Authenticator?</h2>
+<p>Google Authenticator is a software-based authenticator that
+implements Time-based One-Time Password (TOTP) multi-factor
+authentication. It generates a temporary, six-digit verification code
+that changes every 30 seconds. By linking this app to your Ubuntu
+server, you ensure that even if an attacker steals your SSH password or
+private key, they cannot gain access without physical possession of your
+mobile device.</p>
+<hr />
+<h2 id="step-1-install-the-google-authenticator-pam-module">Step 1:
+Install the Google Authenticator PAM Module</h2>
+<p>Ubuntu uses Pluggable Authentication Modules (PAM) to handle user
+authentication. You must install the Google Authenticator PAM module to
+integrate the TOTP mechanism with your system.</p>
+<p>Connect to your Ubuntu server via SSH and run the following
+commands:</p>
+<div class="sourceCode" id="cb1"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> apt update</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> apt install libpam-google-authenticator <span class="at">-y</span></span></code></pre></div>
+<hr />
+<h2 id="step-2-configure-google-authenticator-for-your-user">Step 2:
+Configure Google Authenticator for Your User</h2>
+<p>Once installed, run the configuration initialization tool in your
+terminal.</p>
+<div class="sourceCode" id="cb2"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="ex">google-authenticator</span></span></code></pre></div>
+<p>The system will ask you a series of questions. Respond to them as
+follows:</p>
+<ol type="1">
+<li><strong>Do you want authentication tokens to be
+time-based?</strong><br />
+Type <code>y</code> (yes). This ensures your codes change every 30
+seconds.</li>
+<li><strong>Scan the QR Code:</strong><br />
+A large QR code will appear in your terminal. Open the Google
+Authenticator app on your smartphone, tap the <strong>+</strong> icon,
+select <strong>Scan a QR code</strong>, and scan the terminal screen. If
+the QR code does not render correctly, manually enter the secret key
+displayed below the code.</li>
+<li><strong>Write down your emergency scratch codes:</strong><br />
+Below the QR code, you will see a list of five-digit emergency scratch
+codes. Write these down and store them in a secure place. If you lose
+your phone, these codes are the only way to log back into your
+server.</li>
+<li><strong>Update your configuration file?</strong><br />
+Type <code>y</code> (yes) to save the settings to your profile
+(<code>~/.google_authenticator</code>).</li>
+<li><strong>Disallow multiple uses of the same token?</strong><br />
+Type <code>y</code> (yes). This prevents man-in-the-middle attacks.</li>
+<li><strong>Extend the login window?</strong><br />
+Type <code>n</code> (no) to keep a tight 30-second window, or
+<code>y</code> (yes) if you frequently experience time synchronization
+issues between your phone and server.</li>
+<li><strong>Enable rate-limiting?</strong><br />
+Type <code>y</code> (yes) to restrict login attempts to 3 times every 30
+seconds, protecting you against brute-force attacks.</li>
+</ol>
+<hr />
+<h2 id="step-3-configure-pam-for-ssh">Step 3: Configure PAM for SSH</h2>
+<p>Now you must configure the SSH daemon to use the PAM module you just
+installed and configured.</p>
+<p>Open the PAM configuration file for SSH using a text editor:</p>
+<div class="sourceCode" id="cb3"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> nano /etc/pam.d/sshd</span></code></pre></div>
+<p>Add the following line at the bottom of the file:</p>
+<pre class="text"><code>auth required pam_google_authenticator.so</code></pre>
+<p><em>Note: If you want to allow users who have not set up Google
+Authenticator to still log in using only their password, append
+<code>nullok</code> to the end of the line:
+<code>auth required pam_google_authenticator.so nullok</code>.</em></p>
+<p>Save and close the file (in Nano, press <code>Ctrl+O</code>,
+<code>Enter</code>, then <code>Ctrl+X</code>).</p>
+<hr />
+<h2 id="step-4-configure-the-ssh-daemon">Step 4: Configure the SSH
+Daemon</h2>
+<p>Next, instruct the SSH daemon to request the multi-factor
+authentication code.</p>
+<p>Open the SSH configuration file:</p>
+<div class="sourceCode" id="cb5"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> nano /etc/ssh/sshd_config</span></code></pre></div>
+<p>Locate the following parameters and ensure they are configured as
+shown below. If they are commented out with a <code>#</code>, remove the
+<code>#</code>.</p>
+<ul>
+<li><p>Set <code>KbdInteractiveAuthentication</code> (or
+<code>ChallengeResponseAuthentication</code> on older Ubuntu versions)
+to <code>yes</code>:</p>
+<pre class="text"><code>KbdInteractiveAuthentication yes</code></pre></li>
+<li><p>Ensure <code>UsePAM</code> is enabled:</p>
+<pre class="text"><code>UsePAM yes</code></pre></li>
+</ul>
+<h3 id="if-you-use-ssh-keys-for-authentication">If you use SSH Keys for
+authentication:</h3>
+<p>By default, SSH keys bypass password and PAM authentication. To
+require both an SSH key and a Google Authenticator verification code,
+append the following line to the end of the
+<code>/etc/ssh/sshd_config</code> file:</p>
+<pre class="text"><code>AuthenticationMethods publickey,keyboard-interactive</code></pre>
+<p>Save and close the file.</p>
+<hr />
+<h2 id="step-5-restart-the-ssh-service">Step 5: Restart the SSH
+Service</h2>
+<p>Apply the changes by restarting the SSH daemon:</p>
+<div class="sourceCode" id="cb9"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> systemctl restart ssh</span></code></pre></div>
+<p><em>Crucial: Do not close your current terminal window yet. Open a
+new terminal window to test the connection first, ensuring you do not
+lock yourself out if there is a configuration error.</em></p>
+<hr />
+<h2 id="step-6-test-the-configuration">Step 6: Test the
+Configuration</h2>
+<p>Open a new terminal window and attempt to log into your Ubuntu server
+via SSH:</p>
+<div class="sourceCode" id="cb10"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="fu">ssh</span> username@your_server_ip</span></code></pre></div>
+<p>If you configured SSH keys with MFA, the server will authenticate
+your private key first, and then prompt you for the verification
+code:</p>
+<pre class="text"><code>Verification code:</code></pre>
+<p>Enter the 6-digit code currently displayed in your mobile Google
+Authenticator app. Once entered correctly, you will be granted access to
+the server.</p></article>
+        <div id=comments-container></div>
+
+        <script>
+            const utterancesScript = document.createElement('script');
+            
+            utterancesScript.setAttribute('src', 'https://utteranc.es/client.js');
+            utterancesScript.setAttribute('repo', 'salivity/ssh'); 
+            utterancesScript.setAttribute('issue-term', 'pathname'); 
+            utterancesScript.setAttribute('theme', localStorage.getItem('theme') === 'light' ? 'github-light' : 'github-dark'); 
+            utterancesScript.setAttribute('crossorigin', 'anonymous');
+            utterancesScript.async = true;
+
+            document.getElementById('comments-container').appendChild(utterancesScript);
+        </script>
+    
+    </main>
+    <footer>
+        <nav>
+            <ul class="footer-links">
+                <li><a href="/ssh/privacy-policy">Privacy Policy</a></li>
+                <li><a href="/ssh/terms-and-conditions">Terms and Conditions</a></li>
+            </ul>
+        </nav>
+        <div class="copyright">
+            Copyright &copy; <span id="current-year"></span>
+        </div>
+    </footer>
+</body>
+</html>

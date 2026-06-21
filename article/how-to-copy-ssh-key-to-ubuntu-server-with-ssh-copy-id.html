@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>How to Copy SSH Key to Ubuntu Server with ssh-copy-id - ssh</title>
+    <meta name="description" content="Using SSH keys for authentication provides a secure and convenient way to log into your remote Ubuntu servers without typing a password every time. This article demonstrates how to use the ssh-copy-id command-line tool to quickly and safely copy your loc">
+    <link rel="canonical" href="https://salivity.github.io/ssh/article/how-to-copy-ssh-key-to-ubuntu-server-with-ssh-copy-id">
+    <link rel="icon" href="/ssh/favicon.ico">
+    <link rel="stylesheet" href="/ssh/css/style.css">
+    <script src="/ssh/js/fuse.min.js"></script>
+    <script src="/ssh/js/script.js" defer></script>
+    <script id="MathJax-script" src="/ssh/js/mathjax.min.js" async></script>
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="How to Copy SSH Key to Ubuntu Server with ssh-copy-id - ssh" />
+    <meta property="og:url" content="https://salivity.github.io/ssh/article/how-to-copy-ssh-key-to-ubuntu-server-with-ssh-copy-id" />
+    <meta property="og:image:url" content="https://salivity.github.io/ssh/images/open-graph/default.webp" />
+    <meta property="og:image:secure_url" content="https://salivity.github.io/ssh/images/open-graph/default.webp" />
+    <meta property="og:image:width" content="1120" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:description" content="Using SSH keys for authentication provides a secure and convenient way to log into your remote Ubuntu servers without typing a password every time. This article demonstrates how to use the ssh-copy-id command-line tool to quickly and safely copy your loc" />
+    <link rel="manifest" href="/ssh/pwa/manifest.json" />
+</head>
+<body>
+    <header>
+        <a href="/ssh/" aria-label="Go To Home Page" title="Go To Home Page" id="logo">
+            <span>salivity.github.io/</span><span>ssh</span>
+        </a>
+        <nav>
+            <ul class="header-links">
+                <li><a href="https://github.com/salivity" title="Github" aria-label="Go To Github Profile Page"><svg class="svg-icon" focusable="false" aria-hidden="true" viewBox="0 0 24 24"><path d="M12 1.27a11 11 0 00-3.48 21.46c.55.09.73-.28.73-.55v-1.84c-3.03.64-3.67-1.46-3.67-1.46-.55-1.29-1.28-1.65-1.28-1.65-.92-.65.1-.65.1-.65 1.1 0 1.73 1.1 1.73 1.1.92 1.65 2.57 1.2 3.21.92a2 2 0 01.64-1.47c-2.47-.27-5.04-1.19-5.04-5.5 0-1.1.46-2.1 1.2-2.84a3.76 3.76 0 010-2.93s.91-.28 3.11 1.1c1.8-.49 3.7-.49 5.5 0 2.1-1.38 3.02-1.1 3.02-1.1a3.76 3.76 0 010 2.93c.83.74 1.2 1.74 1.2 2.94 0 4.21-2.57 5.13-5.04 5.4.45.37.82.92.82 2.02v3.03c0 .27.1.64.73.55A11 11 0 0012 1.27"></path></svg></a></li>
+                <li><a href="/ssh/search" title="Search" aria-label="Go To Search Page"><svg class="svg-icon" aria-hidden="true" focusable="false" viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14"></path></svg></a></li>
+                <li><a id="theme-toggle" title="Theme" href="javascript:void(0);" aria-label="Toggle Website Theme"></a></li>
+            </ul>
+        </nav>
+    </header>
+    <main>
+        <article><h1 id="how-to-copy-ssh-key-to-ubuntu-server-with-ssh-copy-id">How to
+Copy SSH Key to Ubuntu Server with ssh-copy-id</h1>
+<p>Using SSH keys for authentication provides a secure and convenient
+way to log into your remote Ubuntu servers without typing a password
+every time. This article demonstrates how to use the
+<code>ssh-copy-id</code> command-line tool to quickly and safely copy
+your local SSH public key to a remote Ubuntu Linux server. By the end of
+this guide, you will be able to configure passwordless SSH access in
+just a few simple steps.</p>
+<h3 id="prerequisites">Prerequisites</h3>
+<p>Before you begin, ensure you have: * An SSH key pair generated on
+your local computer. * The IP address or domain name of your remote
+Ubuntu server. * The username and password for a user account on the
+remote server.</p>
+<p>If you do not have an SSH key pair on your local machine, you can
+generate one by running the following command in your local terminal and
+following the prompts:</p>
+<div class="sourceCode" id="cb1"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">ssh-keygen</span> <span class="at">-t</span> ed25519</span></code></pre></div>
+<h3 id="step-1-copy-the-ssh-public-key-to-the-remote-server">Step 1:
+Copy the SSH Public Key to the Remote Server</h3>
+<p>The <code>ssh-copy-id</code> tool is the easiest and most secure way
+to install your public key on a remote machine. It automatically appends
+your local public key to the <code>~/.ssh/authorized_keys</code> file on
+the remote server and configures the correct file permissions.</p>
+<p>Open your local terminal and run the following command, replacing
+<code>username</code> with your remote username and
+<code>remote_host</code> with your server’s IP address or domain:</p>
+<div class="sourceCode" id="cb2"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="ex">ssh-copy-id</span> username@remote_host</span></code></pre></div>
+<p>If your remote server uses a custom SSH port (other than the default
+port 22), specify the port using the <code>-p</code> flag inside quotes,
+or use the <code>-i</code> flag to specify a path to a specific identity
+file:</p>
+<div class="sourceCode" id="cb3"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="ex">ssh-copy-id</span> <span class="at">-p</span> 2222 username@remote_host</span></code></pre></div>
+<h3 id="step-2-authenticate-and-complete-the-transfer">Step 2:
+Authenticate and Complete the Transfer</h3>
+<p>After running the command, you will see a output in your
+terminal:</p>
+<ol type="1">
+<li>If this is your first time connecting to this server, your terminal
+will ask you to confirm the authenticity of the host. Type
+<code>yes</code> and press <strong>Enter</strong>.</li>
+<li>The utility will then prompt you to enter the password for the
+remote user account.</li>
+<li>Type your password and press <strong>Enter</strong>.</li>
+</ol>
+<p>Once authenticated, <code>ssh-copy-id</code> will copy the public key
+and display a success message indicating that the key has been
+added.</p>
+<h3 id="step-3-test-the-passwordless-login">Step 3: Test the
+Passwordless Login</h3>
+<p>To verify that the SSH key was copied successfully and that you can
+log in without a password, attempt to connect to the remote server using
+the standard SSH command:</p>
+<div class="sourceCode" id="cb4"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="fu">ssh</span> username@remote_host</span></code></pre></div>
+<p>If the configuration is correct, the remote server will authenticate
+your session using your local private key, and you will be logged
+directly into the Ubuntu shell environment without being prompted for a
+password.</p></article>
+        <div id=comments-container></div>
+
+        <script>
+            const utterancesScript = document.createElement('script');
+            
+            utterancesScript.setAttribute('src', 'https://utteranc.es/client.js');
+            utterancesScript.setAttribute('repo', 'salivity/ssh'); 
+            utterancesScript.setAttribute('issue-term', 'pathname'); 
+            utterancesScript.setAttribute('theme', localStorage.getItem('theme') === 'light' ? 'github-light' : 'github-dark'); 
+            utterancesScript.setAttribute('crossorigin', 'anonymous');
+            utterancesScript.async = true;
+
+            document.getElementById('comments-container').appendChild(utterancesScript);
+        </script>
+    
+    </main>
+    <footer>
+        <nav>
+            <ul class="footer-links">
+                <li><a href="/ssh/privacy-policy">Privacy Policy</a></li>
+                <li><a href="/ssh/terms-and-conditions">Terms and Conditions</a></li>
+            </ul>
+        </nav>
+        <div class="copyright">
+            Copyright &copy; <span id="current-year"></span>
+        </div>
+    </footer>
+</body>
+</html>

@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>What Does SSH Continue Connecting Warning Mean - ssh</title>
+    <meta name="description" content="When connecting to an Ubuntu Linux SSH server for the first time, users are often greeted with a security warning asking if they want to "continue connecting." This article explains what this warning means, why it occurs, how SSH key verification works,">
+    <link rel="canonical" href="https://salivity.github.io/ssh/article/what-does-ssh-continue-connecting-warning-mean">
+    <link rel="icon" href="/ssh/favicon.ico">
+    <link rel="stylesheet" href="/ssh/css/style.css">
+    <script src="/ssh/js/fuse.min.js"></script>
+    <script src="/ssh/js/script.js" defer></script>
+    <script id="MathJax-script" src="/ssh/js/mathjax.min.js" async></script>
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="What Does SSH Continue Connecting Warning Mean - ssh" />
+    <meta property="og:url" content="https://salivity.github.io/ssh/article/what-does-ssh-continue-connecting-warning-mean" />
+    <meta property="og:image:url" content="https://salivity.github.io/ssh/images/open-graph/default.webp" />
+    <meta property="og:image:secure_url" content="https://salivity.github.io/ssh/images/open-graph/default.webp" />
+    <meta property="og:image:width" content="1120" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:description" content="When connecting to an Ubuntu Linux SSH server for the first time, users are often greeted with a security warning asking if they want to "continue connecting." This article explains what this warning means, why it occurs, how SSH key verification works," />
+    <link rel="manifest" href="/ssh/pwa/manifest.json" />
+</head>
+<body>
+    <header>
+        <a href="/ssh/" aria-label="Go To Home Page" title="Go To Home Page" id="logo">
+            <span>salivity.github.io/</span><span>ssh</span>
+        </a>
+        <nav>
+            <ul class="header-links">
+                <li><a href="https://github.com/salivity" title="Github" aria-label="Go To Github Profile Page"><svg class="svg-icon" focusable="false" aria-hidden="true" viewBox="0 0 24 24"><path d="M12 1.27a11 11 0 00-3.48 21.46c.55.09.73-.28.73-.55v-1.84c-3.03.64-3.67-1.46-3.67-1.46-.55-1.29-1.28-1.65-1.28-1.65-.92-.65.1-.65.1-.65 1.1 0 1.73 1.1 1.73 1.1.92 1.65 2.57 1.2 3.21.92a2 2 0 01.64-1.47c-2.47-.27-5.04-1.19-5.04-5.5 0-1.1.46-2.1 1.2-2.84a3.76 3.76 0 010-2.93s.91-.28 3.11 1.1c1.8-.49 3.7-.49 5.5 0 2.1-1.38 3.02-1.1 3.02-1.1a3.76 3.76 0 010 2.93c.83.74 1.2 1.74 1.2 2.94 0 4.21-2.57 5.13-5.04 5.4.45.37.82.92.82 2.02v3.03c0 .27.1.64.73.55A11 11 0 0012 1.27"></path></svg></a></li>
+                <li><a href="/ssh/search" title="Search" aria-label="Go To Search Page"><svg class="svg-icon" aria-hidden="true" focusable="false" viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14"></path></svg></a></li>
+                <li><a id="theme-toggle" title="Theme" href="javascript:void(0);" aria-label="Toggle Website Theme"></a></li>
+            </ul>
+        </nav>
+    </header>
+    <main>
+        <article><h1 id="what-does-ssh-continue-connecting-warning-mean">What Does SSH
+Continue Connecting Warning Mean</h1>
+<p>When connecting to an Ubuntu Linux SSH server for the first time,
+users are often greeted with a security warning asking if they want to
+“continue connecting.” This article explains what this warning means,
+why it occurs, how SSH key verification works, and how to safely proceed
+without compromising your network security.</p>
+<h2 id="the-security-warning-explained">The Security Warning
+Explained</h2>
+<p>When you initiate your first SSH connection to an Ubuntu server, you
+will see a message that looks similar to this:</p>
+<pre class="text"><code>The authenticity of host &#39;192.168.1.50 (192.168.1.50)&#39; can&#39;t be established.
+ED25519 key fingerprint is SHA256:7yT...
+Are you sure you want to continue connecting (yes/no/[fingerprint])?</code></pre>
+<p>This warning is a built-in security feature of the SSH (Secure Shell)
+protocol known as <strong>Host Key Verification</strong>. It means that
+your local computer has no prior record of this specific server and
+cannot automatically verify that the server you are reaching is indeed
+the correct destination.</p>
+<h2 id="why-this-warning-occurs">Why This Warning Occurs</h2>
+<p>SSH uses public-key cryptography to encrypt the connection between
+your computer (the client) and the Ubuntu server.</p>
+<ol type="1">
+<li><strong>First-Time Connection:</strong> Every SSH server has a
+unique cryptographic “host key.” Because you have never connected to
+this Ubuntu server before, your local computer does not have its host
+key saved in its database.</li>
+<li><strong>Preventing Man-in-the-Middle (MITM) Attacks:</strong> The
+warning exists to protect you from attackers. If a malicious actor
+intercepted your network traffic and redirected your connection to a
+fake server, the fake server would present a different host key. Without
+this warning, your client would connect automatically, and the attacker
+could steal your login credentials.</li>
+</ol>
+<h2 id="what-happens-when-you-type-yes">What Happens When You Type
+“Yes”</h2>
+<p>If you type <code>yes</code> and press Enter, your computer performs
+two actions:</p>
+<ol type="1">
+<li><strong>Establishes the Connection:</strong> It accepts the server’s
+identity and proceeds to the password or SSH key prompt.</li>
+<li><strong>Saves the Host Key:</strong> It saves the server’s public
+key fingerprint to a local file on your computer located at
+<code>~/.ssh/known_hosts</code>.</li>
+</ol>
+<p>During all future connections to this server, your computer will
+quietly compare the saved host key in <code>known_hosts</code> with the
+key presented by the server. If they match, you will connect instantly
+without any warnings.</p>
+<h2 id="how-to-handle-the-warning-safely">How to Handle the Warning
+Safely</h2>
+<p>While most users simply type <code>yes</code>, the secure and correct
+way to handle this warning involves verification:</p>
+<ol type="1">
+<li><strong>Verify the Fingerprint:</strong> Ideally, you should obtain
+the server’s actual fingerprint beforehand (for example, from your cloud
+provider’s console or by running
+<code>ssh-keygen -lf /etc/ssh/ssh_host_ed25519_key.pub</code> directly
+on the server’s local terminal).</li>
+<li><strong>Compare:</strong> Compare the fingerprint displayed in the
+warning with the one you obtained. If they match, it is safe to type
+<code>yes</code>.</li>
+<li><strong>If the Warning Appears Later:</strong> If you have connected
+to the server successfully in the past, but suddenly receive a warning
+stating that the “Host key verification failed” or that the host key has
+changed, <strong>do not connect</strong>. This indicates either that the
+server has been reinstalled, or that someone is attempting to intercept
+your connection.</li>
+</ol></article>
+        <div id=comments-container></div>
+
+        <script>
+            const utterancesScript = document.createElement('script');
+            
+            utterancesScript.setAttribute('src', 'https://utteranc.es/client.js');
+            utterancesScript.setAttribute('repo', 'salivity/ssh'); 
+            utterancesScript.setAttribute('issue-term', 'pathname'); 
+            utterancesScript.setAttribute('theme', localStorage.getItem('theme') === 'light' ? 'github-light' : 'github-dark'); 
+            utterancesScript.setAttribute('crossorigin', 'anonymous');
+            utterancesScript.async = true;
+
+            document.getElementById('comments-container').appendChild(utterancesScript);
+        </script>
+    
+    </main>
+    <footer>
+        <nav>
+            <ul class="footer-links">
+                <li><a href="/ssh/privacy-policy">Privacy Policy</a></li>
+                <li><a href="/ssh/terms-and-conditions">Terms and Conditions</a></li>
+            </ul>
+        </nav>
+        <div class="copyright">
+            Copyright &copy; <span id="current-year"></span>
+        </div>
+    </footer>
+</body>
+</html>

@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Limit SSH Access to Specific IPs on Ubuntu Linux - ssh</title>
+    <meta name="description" content="Securing your Ubuntu SSH server is crucial for preventing unauthorized access and brute-force attacks. This guide provides a straightforward, step-by-step walkthrough on how to configure the Uncomplicated Firewall (UFW) in Ubuntu Linux to restrict SSH co">
+    <link rel="canonical" href="https://salivity.github.io/ssh/article/limit-ssh-access-to-specific-ips-on-ubuntu-linux">
+    <link rel="icon" href="/ssh/favicon.ico">
+    <link rel="stylesheet" href="/ssh/css/style.css">
+    <script src="/ssh/js/fuse.min.js"></script>
+    <script src="/ssh/js/script.js" defer></script>
+    <script id="MathJax-script" src="/ssh/js/mathjax.min.js" async></script>
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="Limit SSH Access to Specific IPs on Ubuntu Linux - ssh" />
+    <meta property="og:url" content="https://salivity.github.io/ssh/article/limit-ssh-access-to-specific-ips-on-ubuntu-linux" />
+    <meta property="og:image:url" content="https://salivity.github.io/ssh/images/open-graph/default.webp" />
+    <meta property="og:image:secure_url" content="https://salivity.github.io/ssh/images/open-graph/default.webp" />
+    <meta property="og:image:width" content="1120" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:description" content="Securing your Ubuntu SSH server is crucial for preventing unauthorized access and brute-force attacks. This guide provides a straightforward, step-by-step walkthrough on how to configure the Uncomplicated Firewall (UFW) in Ubuntu Linux to restrict SSH co" />
+    <link rel="manifest" href="/ssh/pwa/manifest.json" />
+</head>
+<body>
+    <header>
+        <a href="/ssh/" aria-label="Go To Home Page" title="Go To Home Page" id="logo">
+            <span>salivity.github.io/</span><span>ssh</span>
+        </a>
+        <nav>
+            <ul class="header-links">
+                <li><a href="https://github.com/salivity" title="Github" aria-label="Go To Github Profile Page"><svg class="svg-icon" focusable="false" aria-hidden="true" viewBox="0 0 24 24"><path d="M12 1.27a11 11 0 00-3.48 21.46c.55.09.73-.28.73-.55v-1.84c-3.03.64-3.67-1.46-3.67-1.46-.55-1.29-1.28-1.65-1.28-1.65-.92-.65.1-.65.1-.65 1.1 0 1.73 1.1 1.73 1.1.92 1.65 2.57 1.2 3.21.92a2 2 0 01.64-1.47c-2.47-.27-5.04-1.19-5.04-5.5 0-1.1.46-2.1 1.2-2.84a3.76 3.76 0 010-2.93s.91-.28 3.11 1.1c1.8-.49 3.7-.49 5.5 0 2.1-1.38 3.02-1.1 3.02-1.1a3.76 3.76 0 010 2.93c.83.74 1.2 1.74 1.2 2.94 0 4.21-2.57 5.13-5.04 5.4.45.37.82.92.82 2.02v3.03c0 .27.1.64.73.55A11 11 0 0012 1.27"></path></svg></a></li>
+                <li><a href="/ssh/search" title="Search" aria-label="Go To Search Page"><svg class="svg-icon" aria-hidden="true" focusable="false" viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14"></path></svg></a></li>
+                <li><a id="theme-toggle" title="Theme" href="javascript:void(0);" aria-label="Toggle Website Theme"></a></li>
+            </ul>
+        </nav>
+    </header>
+    <main>
+        <article><h1 id="limit-ssh-access-to-specific-ips-on-ubuntu-linux">Limit SSH
+Access to Specific IPs on Ubuntu Linux</h1>
+<p>Securing your Ubuntu SSH server is crucial for preventing
+unauthorized access and brute-force attacks. This guide provides a
+straightforward, step-by-step walkthrough on how to configure the
+Uncomplicated Firewall (UFW) in Ubuntu Linux to restrict SSH connections
+to only trusted, specific IP addresses, thereby significantly enhancing
+your server’s security.</p>
+<h2 id="step-1-check-your-current-ufw-status">Step 1: Check Your Current
+UFW Status</h2>
+<p>Before making changes, check if the Uncomplicated Firewall (UFW) is
+active on your system.</p>
+<div class="sourceCode" id="cb1"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> ufw status</span></code></pre></div>
+<p>If it says <code>Status: inactive</code>, do not enable it yet. You
+must first configure your allow rules so you do not lock yourself out of
+your server.</p>
+<h2 id="step-2-delete-existing-generic-ssh-rules">Step 2: Delete
+Existing Generic SSH Rules</h2>
+<p>If you previously set up your server, you might have a generic rule
+that allows SSH access from any IP address. You need to remove this
+rule.</p>
+<ol type="1">
+<li><p>View your current rules with numbered indices:</p>
+<div class="sourceCode" id="cb2"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> ufw status numbered</span></code></pre></div></li>
+<li><p>Locate the rule that allows SSH or port 22 (usually looks like
+<code>22/tcp</code> or <code>SSH</code> with
+<code>ALLOW IN Anywhere</code>).</p></li>
+<li><p>Delete that rule using its number (replace <code>3</code> with
+the actual rule number from your list):</p>
+<div class="sourceCode" id="cb3"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> ufw delete 3</span></code></pre></div></li>
+</ol>
+<h2 id="step-3-allow-specific-ip-addresses">Step 3: Allow Specific IP
+Addresses</h2>
+<p>Now, create a rule that explicitly allows SSH connections only from
+your specific, trusted IP address. Replace <code>your_trusted_ip</code>
+with your actual public IP address.</p>
+<div class="sourceCode" id="cb4"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> ufw allow from your_trusted_ip to any port 22 proto tcp</span></code></pre></div>
+<p>If you have a subnet or a range of IP addresses (for example, an
+office network), you can allow the entire subnet using CIDR
+notation:</p>
+<div class="sourceCode" id="cb5"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> ufw allow from 192.168.1.0/24 to any port 22 proto tcp</span></code></pre></div>
+<h2 id="step-4-enable-the-firewall">Step 4: Enable the Firewall</h2>
+<p>By default, UFW blocks all incoming connections and allows all
+outgoing connections. Once you have allowed your specific IP, you can
+safely enable the firewall.</p>
+<div class="sourceCode" id="cb6"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> ufw enable</span></code></pre></div>
+<p>Type <code>y</code> and press <strong>Enter</strong> when prompted to
+proceed.</p>
+<h2 id="step-5-verify-the-configuration">Step 5: Verify the
+Configuration</h2>
+<p>To ensure your rules are applied correctly, check the status of UFW
+again:</p>
+<div class="sourceCode" id="cb7"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> ufw status verbose</span></code></pre></div>
+<p>The output should show that port 22 traffic is only allowed from your
+specified IP address or subnet, while all other incoming traffic is
+denied by default.</p>
+<p>Keep your current SSH session open and open a new terminal window to
+test the connection. This ensures you can revert the changes if you made
+a mistake.</p></article>
+        <div id=comments-container></div>
+
+        <script>
+            const utterancesScript = document.createElement('script');
+            
+            utterancesScript.setAttribute('src', 'https://utteranc.es/client.js');
+            utterancesScript.setAttribute('repo', 'salivity/ssh'); 
+            utterancesScript.setAttribute('issue-term', 'pathname'); 
+            utterancesScript.setAttribute('theme', localStorage.getItem('theme') === 'light' ? 'github-light' : 'github-dark'); 
+            utterancesScript.setAttribute('crossorigin', 'anonymous');
+            utterancesScript.async = true;
+
+            document.getElementById('comments-container').appendChild(utterancesScript);
+        </script>
+    
+    </main>
+    <footer>
+        <nav>
+            <ul class="footer-links">
+                <li><a href="/ssh/privacy-policy">Privacy Policy</a></li>
+                <li><a href="/ssh/terms-and-conditions">Terms and Conditions</a></li>
+            </ul>
+        </nav>
+        <div class="copyright">
+            Copyright &copy; <span id="current-year"></span>
+        </div>
+    </footer>
+</body>
+</html>

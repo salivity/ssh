@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fix SSH Service Failed to Start on Ubuntu - ssh</title>
+    <meta name="description" content="If you recently modified your SSH configuration file (/etc/ssh/sshdconfig) on Ubuntu and the SSH service now fails to start, you are likely dealing with a syntax error, an invalid directive, or a port conflict. This guide provides a straightforward, step">
+    <link rel="canonical" href="https://salivity.github.io/ssh/article/fix-ssh-service-failed-to-start-on-ubuntu">
+    <link rel="icon" href="/ssh/favicon.ico">
+    <link rel="stylesheet" href="/ssh/css/style.css">
+    <script src="/ssh/js/fuse.min.js"></script>
+    <script src="/ssh/js/script.js" defer></script>
+    <script id="MathJax-script" src="/ssh/js/mathjax.min.js" async></script>
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="Fix SSH Service Failed to Start on Ubuntu - ssh" />
+    <meta property="og:url" content="https://salivity.github.io/ssh/article/fix-ssh-service-failed-to-start-on-ubuntu" />
+    <meta property="og:image:url" content="https://salivity.github.io/ssh/images/open-graph/default.webp" />
+    <meta property="og:image:secure_url" content="https://salivity.github.io/ssh/images/open-graph/default.webp" />
+    <meta property="og:image:width" content="1120" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:description" content="If you recently modified your SSH configuration file (/etc/ssh/sshdconfig) on Ubuntu and the SSH service now fails to start, you are likely dealing with a syntax error, an invalid directive, or a port conflict. This guide provides a straightforward, step" />
+    <link rel="manifest" href="/ssh/pwa/manifest.json" />
+</head>
+<body>
+    <header>
+        <a href="/ssh/" aria-label="Go To Home Page" title="Go To Home Page" id="logo">
+            <span>salivity.github.io/</span><span>ssh</span>
+        </a>
+        <nav>
+            <ul class="header-links">
+                <li><a href="https://github.com/salivity" title="Github" aria-label="Go To Github Profile Page"><svg class="svg-icon" focusable="false" aria-hidden="true" viewBox="0 0 24 24"><path d="M12 1.27a11 11 0 00-3.48 21.46c.55.09.73-.28.73-.55v-1.84c-3.03.64-3.67-1.46-3.67-1.46-.55-1.29-1.28-1.65-1.28-1.65-.92-.65.1-.65.1-.65 1.1 0 1.73 1.1 1.73 1.1.92 1.65 2.57 1.2 3.21.92a2 2 0 01.64-1.47c-2.47-.27-5.04-1.19-5.04-5.5 0-1.1.46-2.1 1.2-2.84a3.76 3.76 0 010-2.93s.91-.28 3.11 1.1c1.8-.49 3.7-.49 5.5 0 2.1-1.38 3.02-1.1 3.02-1.1a3.76 3.76 0 010 2.93c.83.74 1.2 1.74 1.2 2.94 0 4.21-2.57 5.13-5.04 5.4.45.37.82.92.82 2.02v3.03c0 .27.1.64.73.55A11 11 0 0012 1.27"></path></svg></a></li>
+                <li><a href="/ssh/search" title="Search" aria-label="Go To Search Page"><svg class="svg-icon" aria-hidden="true" focusable="false" viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14"></path></svg></a></li>
+                <li><a id="theme-toggle" title="Theme" href="javascript:void(0);" aria-label="Toggle Website Theme"></a></li>
+            </ul>
+        </nav>
+    </header>
+    <main>
+        <article><h1 id="fix-ssh-service-failed-to-start-on-ubuntu">Fix SSH Service
+Failed to Start on Ubuntu</h1>
+<p>If you recently modified your SSH configuration file
+(<code>/etc/ssh/sshd_config</code>) on Ubuntu and the SSH service now
+fails to start, you are likely dealing with a syntax error, an invalid
+directive, or a port conflict. This guide provides a straightforward,
+step-by-step troubleshooting workflow to identify the exact cause of the
+failure, test your configuration for errors, and successfully restore
+your SSH service.</p>
+<h3 id="test-the-ssh-configuration-syntax">1. Test the SSH Configuration
+Syntax</h3>
+<p>Before trying to restart the service repeatedly, use the built-in SSH
+test command. This is the fastest way to find syntax errors in your
+configuration file without affecting the running service.</p>
+<p>Run the following command in your terminal:</p>
+<div class="sourceCode" id="cb1"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> sshd <span class="at">-t</span></span></code></pre></div>
+<ul>
+<li><strong>If there is an error:</strong> The command will output the
+exact line number and the nature of the error (e.g., “Unsupported
+option” or “Bad configuration option”).</li>
+<li><strong>If there is no output:</strong> Your configuration syntax is
+correct, and the issue lies elsewhere (such as port conflicts or
+directory permissions).</li>
+</ul>
+<h3 id="check-the-ssh-service-status">2. Check the SSH Service
+Status</h3>
+<p>To see the systemd error messages associated with the failed startup,
+check the status of the SSH daemon:</p>
+<div class="sourceCode" id="cb2"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> systemctl status ssh</span></code></pre></div>
+<p>Look at the last few lines of the output. It will often display the
+specific error message that caused the service to fail, such as a
+binding error if another service is already using the configured SSH
+port.</p>
+<h3 id="inspect-system-logs-for-detailed-errors">3. Inspect System Logs
+for Detailed Errors</h3>
+<p>If the status command does not provide enough detail, query the
+systemd journal logs specifically for the SSH service:</p>
+<div class="sourceCode" id="cb3"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> journalctl <span class="at">-xeu</span> ssh</span></code></pre></div>
+<p>Scroll to the bottom of the log output to find the most recent
+startup attempt. This log provides a highly detailed account of what
+happened immediately before the service terminated.</p>
+<h3 id="common-ssh-configuration-errors-to-fix">4. Common SSH
+Configuration Errors to Fix</h3>
+<p>If you find errors during your investigation, open the configuration
+file to correct them:</p>
+<div class="sourceCode" id="cb4"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> nano /etc/ssh/sshd_config</span></code></pre></div>
+<p>Look out for these common issues: * <strong>Port Conflicts:</strong>
+If you changed the default port (Port 22), ensure the new port is not
+being used by another service and is allowed through your firewall
+(<code>sudo ufw allow &lt;new_port&gt;/tcp</code>). *
+<strong>Typographical Errors:</strong> Ensure directives are spelled
+correctly (e.g., <code>PermitRootLogin</code> instead of
+<code>PermitRoot</code>). * <strong>Missing Host Keys:</strong> If the
+log complains about missing host keys, regenerate them using:
+<code>bash     sudo ssh-keygen -A</code></p>
+<h3 id="apply-changes-and-restart-ssh">5. Apply Changes and Restart
+SSH</h3>
+<p>Once you have identified and fixed the errors in the configuration
+file, save the file and run the syntax check once more:</p>
+<div class="sourceCode" id="cb5"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> sshd <span class="at">-t</span></span></code></pre></div>
+<p>If the test runs clean with no output, restart the SSH service to
+apply the changes:</p>
+<div class="sourceCode" id="cb6"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> systemctl restart ssh</span></code></pre></div>
+<p>Verify that the service is active and running:</p>
+<div class="sourceCode" id="cb7"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> systemctl status ssh</span></code></pre></div></article>
+        <div id=comments-container></div>
+
+        <script>
+            const utterancesScript = document.createElement('script');
+            
+            utterancesScript.setAttribute('src', 'https://utteranc.es/client.js');
+            utterancesScript.setAttribute('repo', 'salivity/ssh'); 
+            utterancesScript.setAttribute('issue-term', 'pathname'); 
+            utterancesScript.setAttribute('theme', localStorage.getItem('theme') === 'light' ? 'github-light' : 'github-dark'); 
+            utterancesScript.setAttribute('crossorigin', 'anonymous');
+            utterancesScript.async = true;
+
+            document.getElementById('comments-container').appendChild(utterancesScript);
+        </script>
+    
+    </main>
+    <footer>
+        <nav>
+            <ul class="footer-links">
+                <li><a href="/ssh/privacy-policy">Privacy Policy</a></li>
+                <li><a href="/ssh/terms-and-conditions">Terms and Conditions</a></li>
+            </ul>
+        </nav>
+        <div class="copyright">
+            Copyright &copy; <span id="current-year"></span>
+        </div>
+    </footer>
+</body>
+</html>

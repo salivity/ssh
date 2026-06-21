@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Role of SSH Public Keys on Ubuntu Servers - ssh</title>
+    <meta name="description" content="Secure Shell (SSH) is the standard protocol used to securely access and manage remote Ubuntu Linux servers. This article explains the specific role that the public key plays in SSH key-based authentication, detailing how it acts as a secure digital lock">
+    <link rel="canonical" href="https://salivity.github.io/ssh/article/role-of-ssh-public-keys-on-ubuntu-servers">
+    <link rel="icon" href="/ssh/favicon.ico">
+    <link rel="stylesheet" href="/ssh/css/style.css">
+    <script src="/ssh/js/fuse.min.js"></script>
+    <script src="/ssh/js/script.js" defer></script>
+    <script id="MathJax-script" src="/ssh/js/mathjax.min.js" async></script>
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="Role of SSH Public Keys on Ubuntu Servers - ssh" />
+    <meta property="og:url" content="https://salivity.github.io/ssh/article/role-of-ssh-public-keys-on-ubuntu-servers" />
+    <meta property="og:image:url" content="https://salivity.github.io/ssh/images/open-graph/default.webp" />
+    <meta property="og:image:secure_url" content="https://salivity.github.io/ssh/images/open-graph/default.webp" />
+    <meta property="og:image:width" content="1120" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:description" content="Secure Shell (SSH) is the standard protocol used to securely access and manage remote Ubuntu Linux servers. This article explains the specific role that the public key plays in SSH key-based authentication, detailing how it acts as a secure digital lock" />
+    <link rel="manifest" href="/ssh/pwa/manifest.json" />
+</head>
+<body>
+    <header>
+        <a href="/ssh/" aria-label="Go To Home Page" title="Go To Home Page" id="logo">
+            <span>salivity.github.io/</span><span>ssh</span>
+        </a>
+        <nav>
+            <ul class="header-links">
+                <li><a href="https://github.com/salivity" title="Github" aria-label="Go To Github Profile Page"><svg class="svg-icon" focusable="false" aria-hidden="true" viewBox="0 0 24 24"><path d="M12 1.27a11 11 0 00-3.48 21.46c.55.09.73-.28.73-.55v-1.84c-3.03.64-3.67-1.46-3.67-1.46-.55-1.29-1.28-1.65-1.28-1.65-.92-.65.1-.65.1-.65 1.1 0 1.73 1.1 1.73 1.1.92 1.65 2.57 1.2 3.21.92a2 2 0 01.64-1.47c-2.47-.27-5.04-1.19-5.04-5.5 0-1.1.46-2.1 1.2-2.84a3.76 3.76 0 010-2.93s.91-.28 3.11 1.1c1.8-.49 3.7-.49 5.5 0 2.1-1.38 3.02-1.1 3.02-1.1a3.76 3.76 0 010 2.93c.83.74 1.2 1.74 1.2 2.94 0 4.21-2.57 5.13-5.04 5.4.45.37.82.92.82 2.02v3.03c0 .27.1.64.73.55A11 11 0 0012 1.27"></path></svg></a></li>
+                <li><a href="/ssh/search" title="Search" aria-label="Go To Search Page"><svg class="svg-icon" aria-hidden="true" focusable="false" viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14"></path></svg></a></li>
+                <li><a id="theme-toggle" title="Theme" href="javascript:void(0);" aria-label="Toggle Website Theme"></a></li>
+            </ul>
+        </nav>
+    </header>
+    <main>
+        <article><h1 id="role-of-ssh-public-keys-on-ubuntu-servers">Role of SSH Public
+Keys on Ubuntu Servers</h1>
+<p>Secure Shell (SSH) is the standard protocol used to securely access
+and manage remote Ubuntu Linux servers. This article explains the
+specific role that the public key plays in SSH key-based authentication,
+detailing how it acts as a secure digital lock on the server that can
+only be unlocked by its corresponding private key.</p>
+<h2 id="the-concept-of-asymmetric-cryptography">The Concept of
+Asymmetric Cryptography</h2>
+<p>SSH key-based authentication relies on asymmetric cryptography, a
+system that uses a pair of mathematically linked keys: a public key and
+a private key.</p>
+<ul>
+<li><strong>The Private Key:</strong> Kept strictly confidential on your
+local client machine (e.g., your laptop). It must never be shared.</li>
+<li><strong>The Public Key:</strong> Shared freely and placed on the
+remote Ubuntu server you wish to access.</li>
+</ul>
+<h2 id="the-role-of-the-public-key-the-digital-lock">The Role of the
+Public Key: The Digital Lock</h2>
+<p>In SSH authentication, the public key acts as a digital lock. Its
+primary role is to encrypt data in a way that can only be decrypted by
+the matching private key.</p>
+<p>On an Ubuntu server, your public key is saved in a specific file
+within the home directory of the user you want to log in as:
+<code>~/.ssh/authorized_keys</code>.</p>
+<p>When you attempt to connect to the Ubuntu server via SSH, the
+authentication process unfolds as follows:</p>
+<ol type="1">
+<li><strong>The Challenge:</strong> The Ubuntu server looks in the
+<code>authorized_keys</code> file for a public key associated with your
+username.</li>
+<li><strong>Encryption:</strong> If it finds the public key, the server
+generates a random challenge message and encrypts it using that public
+key.</li>
+<li><strong>The Response:</strong> The server sends this encrypted
+message to your local machine. Because only the matching private key can
+decrypt this message, your local SSH client uses your private key to
+decrypt the challenge, signs it, and sends it back to the server.</li>
+<li><strong>Verification:</strong> The server verifies the response. If
+the response is correct, the server grants you access.</li>
+</ol>
+<h2 id="why-the-public-key-enhances-security-on-ubuntu">Why the Public
+Key Enhances Security on Ubuntu</h2>
+<p>Using a public key for SSH authentication on Ubuntu offers major
+security advantages over traditional password-based logins:</p>
+<ul>
+<li><strong>Resistance to Brute-Force Attacks:</strong> Passwords can be
+guessed or cracked using brute-force tools. SSH keys are incredibly
+complex cryptographic strings that are virtually impossible to
+guess.</li>
+<li><strong>No Credentials Exchanged:</strong> The private key never
+leaves your local computer. The server only uses the public key to issue
+a challenge, meaning your secret credentials are never exposed to the
+network.</li>
+<li><strong>Automation-Friendly:</strong> Public key authentication
+allows for secure, passwordless automation of administrative tasks,
+scripts, and backups on Ubuntu servers.</li>
+</ul></article>
+        <div id=comments-container></div>
+
+        <script>
+            const utterancesScript = document.createElement('script');
+            
+            utterancesScript.setAttribute('src', 'https://utteranc.es/client.js');
+            utterancesScript.setAttribute('repo', 'salivity/ssh'); 
+            utterancesScript.setAttribute('issue-term', 'pathname'); 
+            utterancesScript.setAttribute('theme', localStorage.getItem('theme') === 'light' ? 'github-light' : 'github-dark'); 
+            utterancesScript.setAttribute('crossorigin', 'anonymous');
+            utterancesScript.async = true;
+
+            document.getElementById('comments-container').appendChild(utterancesScript);
+        </script>
+    
+    </main>
+    <footer>
+        <nav>
+            <ul class="footer-links">
+                <li><a href="/ssh/privacy-policy">Privacy Policy</a></li>
+                <li><a href="/ssh/terms-and-conditions">Terms and Conditions</a></li>
+            </ul>
+        </nav>
+        <div class="copyright">
+            Copyright &copy; <span id="current-year"></span>
+        </div>
+    </footer>
+</body>
+</html>

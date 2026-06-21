@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>How to Use SSH Multiplexing on Ubuntu Linux - ssh</title>
+    <meta name="description" content="SSH multiplexing allows you to reuse an existing SSH connection for subsequent sessions to the same host, drastically reducing the time it takes to establish new connections. This guide covers how to enable, configure, and manage SSH multiplexing on Ubun">
+    <link rel="canonical" href="https://salivity.github.io/ssh/article/how-to-use-ssh-multiplexing-on-ubuntu-linux">
+    <link rel="icon" href="/ssh/favicon.ico">
+    <link rel="stylesheet" href="/ssh/css/style.css">
+    <script src="/ssh/js/fuse.min.js"></script>
+    <script src="/ssh/js/script.js" defer></script>
+    <script id="MathJax-script" src="/ssh/js/mathjax.min.js" async></script>
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="How to Use SSH Multiplexing on Ubuntu Linux - ssh" />
+    <meta property="og:url" content="https://salivity.github.io/ssh/article/how-to-use-ssh-multiplexing-on-ubuntu-linux" />
+    <meta property="og:image:url" content="https://salivity.github.io/ssh/images/open-graph/default.webp" />
+    <meta property="og:image:secure_url" content="https://salivity.github.io/ssh/images/open-graph/default.webp" />
+    <meta property="og:image:width" content="1120" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:description" content="SSH multiplexing allows you to reuse an existing SSH connection for subsequent sessions to the same host, drastically reducing the time it takes to establish new connections. This guide covers how to enable, configure, and manage SSH multiplexing on Ubun" />
+    <link rel="manifest" href="/ssh/pwa/manifest.json" />
+</head>
+<body>
+    <header>
+        <a href="/ssh/" aria-label="Go To Home Page" title="Go To Home Page" id="logo">
+            <span>salivity.github.io/</span><span>ssh</span>
+        </a>
+        <nav>
+            <ul class="header-links">
+                <li><a href="https://github.com/salivity" title="Github" aria-label="Go To Github Profile Page"><svg class="svg-icon" focusable="false" aria-hidden="true" viewBox="0 0 24 24"><path d="M12 1.27a11 11 0 00-3.48 21.46c.55.09.73-.28.73-.55v-1.84c-3.03.64-3.67-1.46-3.67-1.46-.55-1.29-1.28-1.65-1.28-1.65-.92-.65.1-.65.1-.65 1.1 0 1.73 1.1 1.73 1.1.92 1.65 2.57 1.2 3.21.92a2 2 0 01.64-1.47c-2.47-.27-5.04-1.19-5.04-5.5 0-1.1.46-2.1 1.2-2.84a3.76 3.76 0 010-2.93s.91-.28 3.11 1.1c1.8-.49 3.7-.49 5.5 0 2.1-1.38 3.02-1.1 3.02-1.1a3.76 3.76 0 010 2.93c.83.74 1.2 1.74 1.2 2.94 0 4.21-2.57 5.13-5.04 5.4.45.37.82.92.82 2.02v3.03c0 .27.1.64.73.55A11 11 0 0012 1.27"></path></svg></a></li>
+                <li><a href="/ssh/search" title="Search" aria-label="Go To Search Page"><svg class="svg-icon" aria-hidden="true" focusable="false" viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14"></path></svg></a></li>
+                <li><a id="theme-toggle" title="Theme" href="javascript:void(0);" aria-label="Toggle Website Theme"></a></li>
+            </ul>
+        </nav>
+    </header>
+    <main>
+        <article><h1 id="how-to-use-ssh-multiplexing-on-ubuntu-linux">How to Use SSH
+Multiplexing on Ubuntu Linux</h1>
+<p>SSH multiplexing allows you to reuse an existing SSH connection for
+subsequent sessions to the same host, drastically reducing the time it
+takes to establish new connections. This guide covers how to enable,
+configure, and manage SSH multiplexing on Ubuntu Linux, allowing you to
+speed up multiple terminal sessions, SFTP file transfers, and automation
+tools like Ansible.</p>
+<h3 id="what-is-ssh-multiplexing">What is SSH Multiplexing?</h3>
+<p>By default, every time you open a new SSH session, your system must
+perform a cryptographic handshake, authenticate your user, and establish
+a secure channel. This process can take anywhere from a fraction of a
+second to several seconds, depending on network latency.</p>
+<p>SSH multiplexing bypasses this overhead. The first connection you
+establish (the “master” connection) creates a Unix socket. Subsequent
+connections (the “slave” connections) piggyback on this existing socket,
+bypassing authentication and handshaking entirely for near-instantaneous
+connections.</p>
+<h3 id="step-1-create-the-sockets-directory">Step 1: Create the Sockets
+Directory</h3>
+<p>First, create a dedicated directory to store the socket files that
+SSH will use to manage the multiplexed connections. Open your terminal
+and run:</p>
+<div class="sourceCode" id="cb1"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">mkdir</span> <span class="at">-p</span> ~/.ssh/sockets</span></code></pre></div>
+<p>Set the correct permissions to ensure this directory remains
+secure:</p>
+<div class="sourceCode" id="cb2"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="fu">chmod</span> 700 ~/.ssh/sockets</span></code></pre></div>
+<h3 id="step-2-configure-ssh-multiplexing">Step 2: Configure SSH
+Multiplexing</h3>
+<p>To enable multiplexing, you need to modify your local SSH
+configuration file. Open the file using your preferred text editor:</p>
+<div class="sourceCode" id="cb3"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="fu">nano</span> ~/.ssh/config</span></code></pre></div>
+<p>If the file does not exist, this command will create it. Add the
+following configuration block to the file:</p>
+<pre class="text"><code>Host *
+    ControlMaster auto
+    ControlPath ~/.ssh/sockets/%r@%h:%p
+    ControlPersist 10m</code></pre>
+<p>Here is what these directives mean: *
+<strong><code>Host *</code></strong>: Applies these rules to all remote
+hosts. You can replace the asterisk with specific domain names or IP
+addresses if you only want multiplexing enabled for specific servers. *
+<strong><code>ControlMaster auto</code></strong>: Tells SSH to look for
+an existing master connection socket. If one exists, it uses it; if not,
+it establishes a new master connection. *
+<strong><code>ControlPath</code></strong>: Defines the path where the
+socket files will be stored. The variables represent the remote username
+(<code>%r</code>), host (<code>%h</code>), and port (<code>%p</code>). *
+<strong><code>ControlPersist 10m</code></strong>: Keeps the master
+connection open in the background for 10 minutes after you close your
+last active terminal session. This ensures that if you reconnect within
+10 minutes, you still benefit from the speed increase.</p>
+<p>Save and close the file (in Nano, press <code>Ctrl+O</code>,
+<code>Enter</code>, and then <code>Ctrl+X</code>).</p>
+<h3 id="step-3-test-and-verify-the-speed-improvement">Step 3: Test and
+Verify the Speed Improvement</h3>
+<p>To see the performance difference, you can measure the time it takes
+to run a simple command on your remote server before and after a master
+connection is established.</p>
+<p>Run the following command to establish the initial master connection
+and measure the time:</p>
+<div class="sourceCode" id="cb5"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="bu">time</span> ssh user@remote_host exit</span></code></pre></div>
+<p>Run the same command a second time:</p>
+<div class="sourceCode" id="cb6"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="bu">time</span> ssh user@remote_host exit</span></code></pre></div>
+<p>The second command should run almost instantaneously because it
+reuses the socket created by the first connection, eliminating the key
+exchange and authentication steps.</p>
+<h3 id="step-4-managing-multiplexed-connections">Step 4: Managing
+Multiplexed Connections</h3>
+<p>You can manage your active multiplexed connections using the
+<code>-O</code> flag in SSH.</p>
+<p>To check the status of a master connection:</p>
+<div class="sourceCode" id="cb7"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="fu">ssh</span> <span class="at">-O</span> check user@remote_host</span></code></pre></div>
+<p>To request the master connection to exit gracefully (it will wait for
+all slave connections to close):</p>
+<div class="sourceCode" id="cb8"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="fu">ssh</span> <span class="at">-O</span> exit user@remote_host</span></code></pre></div>
+<p>To force the master connection to close immediately, terminating all
+slave connections:</p>
+<div class="sourceCode" id="cb9"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="fu">ssh</span> <span class="at">-O</span> stop user@remote_host</span></code></pre></div></article>
+        <div id=comments-container></div>
+
+        <script>
+            const utterancesScript = document.createElement('script');
+            
+            utterancesScript.setAttribute('src', 'https://utteranc.es/client.js');
+            utterancesScript.setAttribute('repo', 'salivity/ssh'); 
+            utterancesScript.setAttribute('issue-term', 'pathname'); 
+            utterancesScript.setAttribute('theme', localStorage.getItem('theme') === 'light' ? 'github-light' : 'github-dark'); 
+            utterancesScript.setAttribute('crossorigin', 'anonymous');
+            utterancesScript.async = true;
+
+            document.getElementById('comments-container').appendChild(utterancesScript);
+        </script>
+    
+    </main>
+    <footer>
+        <nav>
+            <ul class="footer-links">
+                <li><a href="/ssh/privacy-policy">Privacy Policy</a></li>
+                <li><a href="/ssh/terms-and-conditions">Terms and Conditions</a></li>
+            </ul>
+        </nav>
+        <div class="copyright">
+            Copyright &copy; <span id="current-year"></span>
+        </div>
+    </footer>
+</body>
+</html>
