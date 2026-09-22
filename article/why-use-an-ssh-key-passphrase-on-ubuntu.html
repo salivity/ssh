@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Why Use an SSH Key Passphrase on Ubuntu - ssh</title>
+    <meta name="description" content="Secure Shell (SSH) keys are a highly secure method for authenticating with remote Ubuntu Linux servers, but they can still be compromised if left unprotected. Adding a passphrase to your SSH private key encrypts the key file on your local machine, creati">
+    <link rel="canonical" href="https://salivity.github.io/ssh/article/why-use-an-ssh-key-passphrase-on-ubuntu">
+    <link rel="search" type="application/opensearchdescription+xml" title="ssh" href="/ssh/opensearch.xml">
+    <link rel="icon" href="/ssh/favicon.ico">
+    <link rel="stylesheet" href="/ssh/css/style.css">
+    <link media="print" rel="stylesheet" href="/ssh/css/print.css">
+    <script src="/ssh/js/fuse.min.js"></script>
+    <script src="/ssh/js/script.js"></script>
+    <script id="MathJax-script" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/4.1.3/tex-chtml.min.js" defer></script>
+    <script src="/monetize/monetize.js"></script>
+    <script src="/social/social.js"></script>
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="Why Use an SSH Key Passphrase on Ubuntu - ssh" />
+    <meta property="og:url" content="https://salivity.github.io/ssh/article/why-use-an-ssh-key-passphrase-on-ubuntu" />
+    <meta property="og:image" content="https://salivity.github.io/ssh/images/open-graph/default.webp" />
+    <meta property="og:image:secure_url" content="https://salivity.github.io/ssh/images/open-graph/default.webp" />
+    <meta property="og:image:width" content="1120" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:description" content="Secure Shell (SSH) keys are a highly secure method for authenticating with remote Ubuntu Linux servers, but they can still be compromised if left unprotected. Adding a passphrase to your SSH private key encrypts the key file on your local machine, creati" />
+    <link rel="manifest" href="/ssh/pwa/manifest.json" />
+</head>
+<body>
+    <header>
+        <a href="/ssh/" aria-label="Go To Home Page" title="Go To Home Page" id="logo">
+            <span>salivity.github.io/</span><span>ssh</span>
+        </a>
+        <nav>
+            <ul class="header-links">
+                <li><a href="/ssh/search" title="Search" aria-label="Go To Search Page"><svg class="svg-icon" aria-hidden="true" focusable="false" viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14"></path></svg></a></li>
+                <li><a id="theme-toggle" title="Theme" href="javascript:void(0);" aria-label="Toggle Website Theme"></a></li>
+            </ul>
+        </nav>
+    </header>
+    <main>
+        
+    <div class="article-layout">
+        <aside id="profile-sidebar" class="profile-column" aria-label="Author Profile"></aside>
+        <div class="article-main-column">
+            <article><h1 id="why-use-an-ssh-key-passphrase-on-ubuntu">Why Use an SSH Key
+Passphrase on Ubuntu</h1>
+<p>Secure Shell (SSH) keys are a highly secure method for authenticating
+with remote Ubuntu Linux servers, but they can still be compromised if
+left unprotected. Adding a passphrase to your SSH private key encrypts
+the key file on your local machine, creating a crucial second layer of
+defense. This article explains what an SSH key passphrase is, how it
+functions on Ubuntu, and why it is an essential security best practice
+for protecting your servers from unauthorized access.</p>
+<h2 id="what-is-an-ssh-key-passphrase">What is an SSH Key
+Passphrase?</h2>
+<p>An SSH key pair consists of two parts: a public key, which is shared
+with the remote Ubuntu server, and a private key, which remains on your
+local machine.</p>
+<p>An SSH key passphrase is a password used to encrypt your local
+private key file (typically saved in the <code>~/.ssh/</code>
+directory). When you generate a key pair using the
+<code>ssh-keygen</code> tool on Ubuntu, you are prompted to enter an
+optional passphrase. If you supply one, the private key is encrypted on
+your local storage using a strong encryption algorithm (like AES).
+Without the correct passphrase, the private key cannot be decrypted or
+used to establish an SSH connection.</p>
+<h2 id="why-you-must-use-a-passphrase-on-ubuntu">Why You Must Use a
+Passphrase on Ubuntu</h2>
+<p>Using an SSH key without a passphrase is known as using an
+"unencrypted" or "passwordless" key. While convenient, it poses
+significant security risks. Here is why you should always use a
+passphrase:</p>
+<h3 id="1-protection-against-local-key-theft">1. Protection Against
+Local Key Theft</h3>
+<p>If a malicious actor gains access to your local computer—either
+physically, through malware, or via a security breach—they can easily
+copy your unencrypted private key. Once they have the file, they can
+instantly access every remote Ubuntu server associated with that key. If
+the key is protected by a passphrase, the stolen file is useless to them
+unless they can also crack the passphrase.</p>
+<h3 id="2-multi-factor-authentication-mfa-effect">2. Multi-Factor
+Authentication (MFA) Effect</h3>
+<p>Using a passphrase establishes a form of multi-factor authentication
+for server access. To log into your Ubuntu server, you must possess:</p>
+<ul>
+<li><strong>Something you have:</strong> The physical private key file
+stored on your machine.</li>
+<li><strong>Something you know:</strong> The passphrase required to
+decrypt that key.</li>
+</ul>
+<h3 id="3-mitigating-shared-account-risks">3. Mitigating Shared Account
+Risks</h3>
+<p>In development environments, backup systems, or automated workflows,
+private keys are sometimes stored in shared locations or on shared
+workstations. A passphrase ensures that even if other users can read the
+private key file, they cannot use it to log into remote systems without
+your explicit permission.</p>
+<h2 id="how-the-passphrase-works-in-daily-use">How the Passphrase Works
+in Daily Use</h2>
+<p>On Ubuntu, you do not need to type your passphrase every time you
+connect to a server. Ubuntu includes a tool called <strong>SSH
+Agent</strong> (<code>ssh-agent</code>), which runs in the
+background.</p>
+<p>When you boot your system or open a terminal, you can add your
+private key to the SSH Agent using the <code>ssh-add</code> command. You
+will be prompted to enter your passphrase once. The agent decrypts the
+key and holds it securely in your computer's temporary memory (RAM) for
+the duration of your session. When you initiate an SSH connection, the
+agent handles the authentication automatically, giving you the security
+of an encrypted key with the convenience of passwordless login.</p></article>
+        <div id="comments-container"></div>
+        <script>
+            const utterancesScript = document.createElement('script');
+            utterancesScript.setAttribute('src', 'https://utteranc.es/client.js');
+            utterancesScript.setAttribute('repo', 'salivity/ssh'); 
+            utterancesScript.setAttribute('issue-term', 'pathname'); 
+            utterancesScript.setAttribute('theme', localStorage.getItem('theme') === 'dark' ? 'github-dark' : 'github-light'); 
+            utterancesScript.setAttribute('crossorigin', 'anonymous');
+            utterancesScript.async = true;
+            document.getElementById('comments-container').appendChild(utterancesScript);
+        </script>
+    
+        </div>
+    </div>
+    
+    </main>
+    <footer>
+        <nav>
+            <ul class="social-links">
+            </ul>
+        </nav>
+        <nav>
+            <ul class="footer-links">
+                <li><a href="/ssh/privacy-policy">Privacy Policy</a></li>
+                <li><a href="/ssh/terms-and-conditions">Terms and Conditions</a></li>
+            </ul>
+        </nav>
+        <div class="copyright">
+            Copyright &copy; <span id="current-year"></span>
+        </div>
+    </footer>
+</body>
+</html>

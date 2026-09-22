@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Using Wildcards in Ubuntu SSH Client Config - ssh</title>
+    <meta name="description" content="This article explains how to use wildcards in the Host definitions of the Ubuntu Linux SSH client configuration file. You will learn about the supported wildcard characters, how the SSH client interprets them, and practical configuration examples to simp">
+    <link rel="canonical" href="https://salivity.github.io/ssh/article/using-wildcards-in-ubuntu-ssh-client-config">
+    <link rel="search" type="application/opensearchdescription+xml" title="ssh" href="/ssh/opensearch.xml">
+    <link rel="icon" href="/ssh/favicon.ico">
+    <link rel="stylesheet" href="/ssh/css/style.css">
+    <link media="print" rel="stylesheet" href="/ssh/css/print.css">
+    <script src="/ssh/js/fuse.min.js"></script>
+    <script src="/ssh/js/script.js"></script>
+    <script id="MathJax-script" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/4.1.3/tex-chtml.min.js" defer></script>
+    <script src="/monetize/monetize.js"></script>
+    <script src="/social/social.js"></script>
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="Using Wildcards in Ubuntu SSH Client Config - ssh" />
+    <meta property="og:url" content="https://salivity.github.io/ssh/article/using-wildcards-in-ubuntu-ssh-client-config" />
+    <meta property="og:image" content="https://salivity.github.io/ssh/images/open-graph/default.webp" />
+    <meta property="og:image:secure_url" content="https://salivity.github.io/ssh/images/open-graph/default.webp" />
+    <meta property="og:image:width" content="1120" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:description" content="This article explains how to use wildcards in the Host definitions of the Ubuntu Linux SSH client configuration file. You will learn about the supported wildcard characters, how the SSH client interprets them, and practical configuration examples to simp" />
+    <link rel="manifest" href="/ssh/pwa/manifest.json" />
+</head>
+<body>
+    <header>
+        <a href="/ssh/" aria-label="Go To Home Page" title="Go To Home Page" id="logo">
+            <span>salivity.github.io/</span><span>ssh</span>
+        </a>
+        <nav>
+            <ul class="header-links">
+                <li><a href="/ssh/search" title="Search" aria-label="Go To Search Page"><svg class="svg-icon" aria-hidden="true" focusable="false" viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14"></path></svg></a></li>
+                <li><a id="theme-toggle" title="Theme" href="javascript:void(0);" aria-label="Toggle Website Theme"></a></li>
+            </ul>
+        </nav>
+    </header>
+    <main>
+        
+    <div class="article-layout">
+        <aside id="profile-sidebar" class="profile-column" aria-label="Author Profile"></aside>
+        <div class="article-main-column">
+            <article><h1 id="using-wildcards-in-ubuntu-ssh-client-config">Using Wildcards in
+Ubuntu SSH Client Config</h1>
+<p>This article explains how to use wildcards in the Host definitions of
+the Ubuntu Linux SSH client configuration file. You will learn about the
+supported wildcard characters, how the SSH client interprets them, and
+practical configuration examples to simplify managing multiple remote
+connections.</p>
+<p>Yes, you can use wildcards in the <code>Host</code> definitions of
+your Ubuntu Linux SSH client configuration file (typically located at
+<code>~/.ssh/config</code> or <code>/etc/ssh/ssh_config</code>).
+Wildcards are highly useful for applying consistent settings—such as
+usernames, port numbers, or private key paths—across a group of servers
+without writing separate entries for each one.</p>
+<h3 id="supported-wildcard-characters">Supported Wildcard
+Characters</h3>
+<p>The SSH client configuration supports three primary pattern-matching
+operators in <code>Host</code> definitions:</p>
+<ul>
+<li><strong><code>*</code> (Asterisk):</strong> Matches zero or more
+characters. This is the most commonly used wildcard.</li>
+<li><strong><code>?</code> (Question Mark):</strong> Matches exactly one
+character.</li>
+<li><strong><code>!</code> (Exclamation Mark):</strong> Negates a match.
+If placed at the start of a pattern, it excludes hosts that match the
+subsequent pattern.</li>
+</ul>
+<h3 id="practical-examples">Practical Examples</h3>
+<p>Here is how you can implement wildcards in your
+<code>~/.ssh/config</code> file:</p>
+<h4 id="1-matching-subdomains">1. Matching Subdomains</h4>
+<p>If you frequently connect to various servers under a specific domain,
+you can group them using the asterisk wildcard:</p>
+<pre class="text"><code>Host *.example.com
+    User admin
+    Port 2222
+    IdentityFile ~/.ssh/id_ed25519</code></pre>
+<p>In this scenario, running <code>ssh web.example.com</code> or
+<code>ssh db.example.com</code> will automatically use the username
+<code>admin</code>, port <code>2222</code>, and the specified private
+key.</p>
+<h4 id="2-matching-specific-ip-ranges">2. Matching Specific IP
+Ranges</h4>
+<p>You can target local network ranges or specific subnets using
+wildcards:</p>
+<pre class="text"><code>Host 192.168.1.*
+    User localuser
+    ForwardX11 yes</code></pre>
+<p>Any SSH connection initiated to an IP address starting with
+<code>192.168.1.</code> will apply these settings.</p>
+<h4 id="3-single-character-matching">3. Single-Character Matching</h4>
+<p>If your servers follow a strict naming convention with single-digit
+differences, use the question mark:</p>
+<pre class="text"><code>Host node-?
+    User cluster-admin</code></pre>
+<p>This configuration applies to <code>node-1</code>,
+<code>node-2</code>, or <code>node-a</code>, but will not match
+<code>node-10</code> or <code>node-backend</code>.</p>
+<h4 id="4-global-defaults-catch-all">4. Global Defaults (Catch-All)</h4>
+<p>You can use a single asterisk to apply fallback settings for all
+hosts.</p>
+<pre class="text"><code>Host *
+    Compression yes
+    ServerAliveInterval 60</code></pre>
+<h3 id="how-ssh-processes-matches">How SSH Processes Matches</h3>
+<p>The SSH client reads the configuration file from top to bottom. For
+any given connection, it searches for all <code>Host</code> blocks that
+match the hostname you typed.</p>
+<p>If multiple blocks match, SSH merges the configurations. If there is
+a conflict (for example, two different usernames are defined),
+<strong>the first matching value found in the file takes
+precedence</strong>. Because of this, you should always place your most
+specific host definitions at the top of the file, and your generic
+wildcard definitions (like <code>Host *</code>) at the very bottom.</p></article>
+        <div id="comments-container"></div>
+        <script>
+            const utterancesScript = document.createElement('script');
+            utterancesScript.setAttribute('src', 'https://utteranc.es/client.js');
+            utterancesScript.setAttribute('repo', 'salivity/ssh'); 
+            utterancesScript.setAttribute('issue-term', 'pathname'); 
+            utterancesScript.setAttribute('theme', localStorage.getItem('theme') === 'dark' ? 'github-dark' : 'github-light'); 
+            utterancesScript.setAttribute('crossorigin', 'anonymous');
+            utterancesScript.async = true;
+            document.getElementById('comments-container').appendChild(utterancesScript);
+        </script>
+    
+        </div>
+    </div>
+    
+    </main>
+    <footer>
+        <nav>
+            <ul class="social-links">
+            </ul>
+        </nav>
+        <nav>
+            <ul class="footer-links">
+                <li><a href="/ssh/privacy-policy">Privacy Policy</a></li>
+                <li><a href="/ssh/terms-and-conditions">Terms and Conditions</a></li>
+            </ul>
+        </nav>
+        <div class="copyright">
+            Copyright &copy; <span id="current-year"></span>
+        </div>
+    </footer>
+</body>
+</html>
